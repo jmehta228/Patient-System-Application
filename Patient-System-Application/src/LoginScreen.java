@@ -16,7 +16,6 @@ public class LoginScreen extends JPanel {
         setBackground(new Color(240, 240, 230));
         loginPanel.setBackground(new Color(240, 240, 230));
 
-        // initialize text-fields/labels/buttons
         JLabel usernameFieldLabel = new JLabel("Username");
         usernameField = new JTextField(30);
         usernameField.setSize(new Dimension(75, 30));
@@ -46,11 +45,9 @@ public class LoginScreen extends JPanel {
             String line = fileReader.nextLine();
             String[] lineItems = line.split("\\s+");
             if (lineItems[0].equals(username) && lineItems[1].equals(password)) {
-                System.out.println("Login found"); // comment out
                 return true;
             }
         }
-        System.out.println("Login not found"); // comment out
         return false;
     }
 
