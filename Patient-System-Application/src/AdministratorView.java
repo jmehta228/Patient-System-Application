@@ -6,7 +6,7 @@ public class AdministratorView extends JPanel {
         JFrame administratorViewFrame = new JFrame();
         administratorViewFrame.setPreferredSize(new Dimension(1440, 805));
         administratorViewFrame.setResizable(false);
-        administratorViewFrame.setTitle("Patient System Application Version 1.0");
+        administratorViewFrame.setTitle("Patient System Application");
 
         JPanel administratorViewPanel = new JPanel();
         JLabel administratorViewLabel = new JLabel("Administrator view");

@@ -7,11 +7,15 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 public class LoginScreen extends JPanel {
-    private final JTextField usernameField;
-    private final JPasswordField passwordField;
+    static JTextField usernameField;
+    static JPasswordField passwordField;
+    static JButton loginButton;
     JPanel loginPanel = new JPanel(new GridLayout(5, 0));
 
     public LoginScreen() {
+        setBackground(new Color(240, 240, 230));
+        loginPanel.setBackground(new Color(240, 240, 230));
+
         // initialize text-fields/labels/buttons
         JLabel usernameFieldLabel = new JLabel("Username");
         usernameField = new JTextField(30);
@@ -21,16 +25,16 @@ public class LoginScreen extends JPanel {
         passwordField = new JPasswordField(30);
         passwordField.setSize(new Dimension(75, 30));
 
-        JButton loginButton = new JButton("Login");
+        loginButton = new JButton("Login");
         loginButton.setSize(new Dimension(75, 30));
         loginButton.addActionListener(new loginButtonAction());
 
         add(loginPanel);
 
-        loginPanel.add(usernameField);
         loginPanel.add(usernameFieldLabel);
-        loginPanel.add(passwordField);
+        loginPanel.add(usernameField);
         loginPanel.add(passwordFieldLabel);
+        loginPanel.add(passwordField);
         loginPanel.add(loginButton);
     }
 
@@ -57,10 +61,15 @@ public class LoginScreen extends JPanel {
             String passwordString = passwordField.getText();
             try {
                 if (validLogin(usernameString, passwordString)) {
-                    JOptionPane.showMessageDialog(null, "Login Successful");
+                    usernameField.setEnabled(false);
+                    passwordField.setEnabled(false);
+                    loginButton.setEnabled(false);
                     new AdministratorView();
-                } else {
-                    JOptionPane.showMessageDialog(null, "Login Failed. Please try again.");
+                }
+                else {
+                    usernameField.setEnabled(false);
+                    passwordField.setEnabled(false);
+                    loginButton.setEnabled(false);
                     new LoginFailureScreen();
                 }
             }
