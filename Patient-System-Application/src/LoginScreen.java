@@ -10,31 +10,31 @@ public class LoginScreen extends JPanel {
     static JTextField usernameField;
     static JPasswordField passwordField;
     static JButton loginButton;
-    JPanel loginPanel = new JPanel(new GridLayout(5, 0));
+    JPanel loginPanel;
 
     public LoginScreen() {
-        setBackground(new Color(240, 240, 230));
+        loginPanel = new JPanel(new GridLayout(6, 0));
         loginPanel.setBackground(new Color(240, 240, 230));
 
         JLabel usernameFieldLabel = new JLabel("Username");
         usernameField = new JTextField(30);
-        usernameField.setSize(new Dimension(75, 30));
+        usernameField.setPreferredSize(new Dimension(75, 30));
 
         JLabel passwordFieldLabel = new JLabel("Password");
         passwordField = new JPasswordField(30);
-        passwordField.setSize(new Dimension(75, 30));
+        passwordField.setPreferredSize(new Dimension(75, 30));
 
         loginButton = new JButton("Login");
-        loginButton.setSize(new Dimension(75, 30));
-        loginButton.addActionListener(new loginButtonAction());
-
-        add(loginPanel);
+        loginButton.setPreferredSize(new Dimension(75, 30));
+        loginButton.addActionListener(new LoginButtonAction());
 
         loginPanel.add(usernameFieldLabel);
         loginPanel.add(usernameField);
         loginPanel.add(passwordFieldLabel);
         loginPanel.add(passwordField);
         loginPanel.add(loginButton);
+
+        add(loginPanel);
     }
 
     private boolean validLogin(String username, String password) throws FileNotFoundException {
@@ -51,7 +51,7 @@ public class LoginScreen extends JPanel {
         return false;
     }
 
-    private class loginButtonAction implements ActionListener {
+    private class LoginButtonAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             String usernameString = usernameField.getText();

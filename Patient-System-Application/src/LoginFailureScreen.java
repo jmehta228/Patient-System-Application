@@ -18,7 +18,7 @@ public class LoginFailureScreen extends JPanel {
 
         JButton closeButton = new JButton("Close");
         closeButton.setSize(new Dimension(75, 30));
-        closeButton.addActionListener(new closeButtonClicked());
+        closeButton.addActionListener(new CloseButtonClicked());
         loginFailurePanel.add(closeButton);
 
         loginFailureFrame.setLocation(625, 402);
@@ -27,7 +27,7 @@ public class LoginFailureScreen extends JPanel {
         loginFailureFrame.setVisible(true);
     }
 
-    private class closeButtonClicked implements ActionListener {
+    private class CloseButtonClicked implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent event) {
             loginFailureFrame.dispose();
