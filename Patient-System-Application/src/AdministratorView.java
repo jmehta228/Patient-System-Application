@@ -11,6 +11,7 @@ public class AdministratorView extends JFrame {
     JButton returnAvgAgeButton;
     JButton sortPatientButton;
     JButton shufflePatientsButton;
+    JButton logoutButton;
     JFrame administratorViewFrame;
     JPanel administratorButtonPanel;
     JPanel administratorButtonActionViewPanel;
@@ -48,8 +49,12 @@ public class AdministratorView extends JFrame {
         shufflePatientsButton.setBounds(50, 470, 120, 50);
         shufflePatientsButton.addActionListener(new ShufflePatientButtonAction());
 
+        logoutButton = new JButton("Logout");
+        logoutButton.setBounds(50, 540, 120, 50);
+        logoutButton.addActionListener(new LogoutButtonAction());
+
         administratorButtonPanel = new JPanel();
-        administratorButtonPanel.setPreferredSize(new Dimension(805, 50));
+        administratorButtonPanel.setSize(new Dimension(1440, 50));
         administratorButtonPanel.setBackground(Color.GRAY);
         administratorButtonPanel.add(addPatientButton);
         administratorButtonPanel.add(deletePatientButton);
@@ -58,8 +63,14 @@ public class AdministratorView extends JFrame {
         administratorButtonPanel.add(returnAvgAgeButton);
         administratorButtonPanel.add(sortPatientButton);
         administratorButtonPanel.add(shufflePatientsButton);
+        administratorButtonPanel.add(logoutButton);
+
+        administratorButtonActionViewPanel = new JPanel();
+        administratorButtonActionViewPanel.setSize(new Dimension(1440, 755));
+        administratorButtonActionViewPanel.setBackground(Color.LIGHT_GRAY);
 
         administratorViewFrame.add(administratorButtonPanel);
+        administratorViewFrame.add(administratorButtonActionViewPanel);
         administratorViewFrame.setResizable(true);
         administratorViewFrame.pack();
         administratorViewFrame.setVisible(true);
@@ -114,6 +125,11 @@ public class AdministratorView extends JFrame {
         }
     }
 
-
+    private static class LogoutButtonAction implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            
+        }
+    }
 
 }
