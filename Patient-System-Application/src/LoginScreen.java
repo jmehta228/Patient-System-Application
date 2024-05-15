@@ -14,8 +14,6 @@ public class LoginScreen extends JPanel {
 
     public LoginScreen() {
         loginPanel = new JPanel(new GridLayout(6, 0));
-        loginPanel.setBackground(new Color(240, 240, 230));
-
         JLabel usernameFieldLabel = new JLabel("Username");
         usernameField = new JTextField(30);
         usernameField.setPreferredSize(new Dimension(75, 30));

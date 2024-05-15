@@ -6,7 +6,6 @@ public class LoadingWindow extends JWindow {
     public LoadingWindow() {
         JWindow loadingWindow = new JWindow();
         JPanel contentPane = new JPanel();
-        contentPane.setBackground(new Color(240, 240, 230));
         loadingWindow.setContentPane(contentPane);
         JLabel loadingWindowLabel = new JLabel(getLoadingWindowString(), SwingConstants.CENTER);
         loadingWindowLabel.setFont(new Font("Calibri", Font.PLAIN, 20));

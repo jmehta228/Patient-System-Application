@@ -8,7 +8,6 @@ public class PatientSystemApplication extends JFrame {
         mainFrame.setPreferredSize(new Dimension(500, 500));
         mainFrame.setLocation(500, 200);
         mainFrame.add(new LoginScreen());
-        mainFrame.setBackground(new Color(240, 240, 230));
         mainFrame.setResizable(false);
         mainFrame.pack();
         mainFrame.setVisible(true);

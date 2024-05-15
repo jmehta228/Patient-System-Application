@@ -1,3 +1,5 @@
+import ButtonActionFiles.AddPatient;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -11,10 +13,10 @@ public class AdministratorView extends JFrame {
     JButton returnAvgAgeButton;
     JButton sortPatientButton;
     JButton shufflePatientsButton;
-    JButton logoutButton;
+//    JButton logoutButton;
     JFrame administratorViewFrame;
-    JPanel administratorButtonPanel;
-    JPanel administratorButtonActionViewPanel;
+    static JPanel administratorButtonPanel;
+    static JPanel administratorButtonActionViewPanel;
     public AdministratorView() {
         administratorViewFrame = new JFrame();
         administratorViewFrame.setPreferredSize(new Dimension(1440, 805));
@@ -49,9 +51,9 @@ public class AdministratorView extends JFrame {
         shufflePatientsButton.setBounds(50, 470, 120, 50);
         shufflePatientsButton.addActionListener(new ShufflePatientButtonAction());
 
-        logoutButton = new JButton("Logout");
-        logoutButton.setBounds(50, 540, 120, 50);
-        logoutButton.addActionListener(new LogoutButtonAction());
+//        logoutButton = new JButton("Logout");
+//        logoutButton.setBounds(50, 540, 120, 50);
+//        logoutButton.addActionListener(new LogoutButtonAction());
 
         administratorButtonPanel = new JPanel();
         administratorButtonPanel.setSize(new Dimension(1440, 50));
@@ -63,7 +65,7 @@ public class AdministratorView extends JFrame {
         administratorButtonPanel.add(returnAvgAgeButton);
         administratorButtonPanel.add(sortPatientButton);
         administratorButtonPanel.add(shufflePatientsButton);
-        administratorButtonPanel.add(logoutButton);
+//        administratorButtonPanel.add(logoutButton);
 
         administratorButtonActionViewPanel = new JPanel();
         administratorButtonActionViewPanel.setSize(new Dimension(1440, 755));
@@ -79,7 +81,7 @@ public class AdministratorView extends JFrame {
     private static class AddPatientButtonAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
-
+            new AddPatient();
         }
     }
 
@@ -125,11 +127,11 @@ public class AdministratorView extends JFrame {
         }
     }
 
-    private static class LogoutButtonAction implements ActionListener {
-        @Override
-        public void actionPerformed(ActionEvent actionEvent) {
-            
-        }
-    }
+//    private static class LogoutButtonAction implements ActionListener {
+//        @Override
+//        public void actionPerformed(ActionEvent actionEvent) {
+//
+//        }
+//    }
 
 }
