@@ -4,10 +4,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Random;
-import java.util.Scanner;
+import java.time.LocalDate;
+import java.time.Year;
+import java.time.ZoneId;
+import java.util.*;
 
 public class Utils {
     final static String fileName = "patientRecords.txt";
@@ -127,7 +127,7 @@ public class Utils {
     }
 
 
-    public static void deletePatient(String name, String fileName) throws IOException {
+    public static boolean deletePatient(String name, String birthdate, String fileName) throws IOException {
         // Delete an existing patient record from the file
         // can’t delete if the patient still sick.
         // if there are two patientList occur with the same name,
@@ -136,6 +136,7 @@ public class Utils {
         File file = new File(fileName);
         Scanner scan = new Scanner(file);
         ArrayList<String> patientList = new ArrayList<>();
+        boolean output = false;
 
         while (scan.hasNextLine()) {
             String patient = scan.nextLine();
@@ -143,8 +144,9 @@ public class Utils {
         }
 
         for (int i = 0; i < patientList.size(); i++) {
-            if ((patientList.get(i).contains("recover")) && (patientList.get(i).contains(name))) {
+            if ((patientList.get(i).contains("recover")) && (patientList.get(i).contains(name)) && (patientList.get(i).contains(birthdate))) {
                 patientList.remove(i);
+                output = true;
                 break;
             }
         }
@@ -154,12 +156,14 @@ public class Utils {
         }
         out.close();
         scan.close();
+        return output;
     }
 
-    public static void sickToRecovered(String name, String fileName) throws IOException {
+    public static boolean transferPatient(String name, String birthdate, String fileName) throws IOException {
         File file = new File(fileName);
         Scanner scan = new Scanner(file);
         ArrayList<String> patientList = new ArrayList<>();
+        boolean output = false;
 
         while (scan.hasNextLine()) {
             String patient = scan.nextLine();
@@ -168,12 +172,13 @@ public class Utils {
         }
 
         for (int i = 0; i < patientList.size(); i++) {
-            if (patientList.get(i).contains("sick") && patientList.get(i).contains(name)) {
+            if (patientList.get(i).contains("sick") && patientList.get(i).contains(name) && patientList.get(i).contains(birthdate)) {
                 String patientLine = patientList.get(i);
                 String[] patientLineArray = patientLine.split("\\s+");
                 patientLineArray[3] = "recover";
                 String recoveredPatientLine = patientLineArray[0] + " " + patientLineArray[1] + " " + patientLineArray[2] + " " + patientLineArray[3];
                 patientList.set(i, recoveredPatientLine);
+                output = true;
                 break;
             }
         }
@@ -183,6 +188,7 @@ public class Utils {
         }
         out.close();
         scan.close();
+        return output;
     }
 
     public static int countPatients(String status, String fileName) throws FileNotFoundException {
@@ -224,29 +230,104 @@ public class Utils {
         }
     }
 
-    public static void averageAge(String fileName) throws FileNotFoundException {
+//    public static double averageAge(String fileName) throws FileNotFoundException {
+//        // find the average age for all patients in the file
+//        File file = new File(fileName);
+//        Scanner scan = new Scanner(file);
+//        ArrayList<String> patientList = new ArrayList<>();
+//        ArrayList<String> birthDateList = new ArrayList<>();
+//        ArrayList<Integer> ageList = new ArrayList<>();
+//
+//        //PrintWriter out = new PrintWriter(fileName);
+//        int currentMonth = 4;
+//        int currentDay = 12;
+//        int currentYear = 2022;
+//
+//        while (scan.hasNextLine()) {
+//            String patient = scan.nextLine();
+//            patientList.add(patient);
+//        }
+//
+//        for (String s : patientList) {
+//            if (s.contains("sick")) {
+//                birthDateList.add(s.substring(s.length() - 15, s.length() - 5));
+//            } else {
+//                birthDateList.add(s.substring(s.length() - 18, s.length() - 8));
+//            }
+//        }
+//
+//        int age;
+//        int parsedYear;
+//        int parsedMonth;
+//        int parsedDay;
+//
+//        for (String s : birthDateList) {
+//            parsedYear = Integer.parseInt(s.substring(6, 10));
+//            parsedMonth = Integer.parseInt(s.substring(0, 2));
+//            parsedDay = Integer.parseInt(s.substring(3, 5));
+//            if (parsedMonth > currentMonth) {
+//                age = (currentYear - parsedYear) - 1;
+//            }
+//            else if (parsedMonth == currentMonth) {
+//                if (parsedDay > currentDay) {
+//                    age = (currentYear - parsedYear) - 1;
+//                }
+//                else if (parsedDay == currentDay) {
+//                    age = currentYear - parsedYear;
+//                }
+//                else {
+//                    age = currentYear - parsedYear;
+//                }
+//            }
+//            else {
+//                age = currentYear - parsedYear;
+//            }
+//            ageList.add(age);
+//        }
+//        scan.close();
+//        int sumOfPatientAges = 0;
+//
+//        for (Integer integer : ageList) {
+//            sumOfPatientAges += integer;
+//        }
+//        return (double) sumOfPatientAges / ageList.size();
+//    }
+
+    public static double averageAge(String fileName) throws FileNotFoundException {
         // find the average age for all patients in the file
         File file = new File(fileName);
+        if (!file.exists()) {
+            System.out.println("File not found: " + fileName);
+            throw new FileNotFoundException("File not found: " + fileName);
+        }
+
         Scanner scan = new Scanner(file);
         ArrayList<String> patientList = new ArrayList<>();
         ArrayList<String> birthDateList = new ArrayList<>();
         ArrayList<Integer> ageList = new ArrayList<>();
 
-        //PrintWriter out = new PrintWriter(fileName);
-        int currentMonth = 4;
-        int currentDay = 12;
-        int currentYear = 2022;
+        Date date = new Date();
+        LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        final int CURRENT_MONTH = localDate.getMonthValue();
+        final int CURRENT_DAY = localDate.getDayOfMonth();
+        final int CURRENT_YEAR = localDate.getYear();
 
         while (scan.hasNextLine()) {
             String patient = scan.nextLine();
             patientList.add(patient);
         }
 
-        for (String s : patientList) {
-            if (s.contains("sick")) {
-                birthDateList.add(s.substring(s.length() - 15, s.length() - 5 /*, patientList.get(i).length()*/));
-            } else {
-                birthDateList.add(s.substring(s.length() - 18, s.length() - 8));
+        for (int i = 1; i < patientList.size(); i++) {
+            try {
+                if (patientList.get(i).contains("sick")) {
+                    birthDateList.add(patientList.get(i).substring(patientList.get(i).length() - 15, patientList.get(i).length() - 5));
+                }
+                else {
+                    birthDateList.add(patientList.get(i).substring(patientList.get(i).length() - 18, patientList.get(i).length() - 8));
+                }
+            } catch (StringIndexOutOfBoundsException e) {
+                System.out.println("Error parsing line: " + patientList.get(i));
+                continue; // Skip this entry if there's an error
             }
         }
 
@@ -256,38 +337,42 @@ public class Utils {
         int parsedDay;
 
         for (String s : birthDateList) {
-            parsedYear = Integer.parseInt(s.substring(6, 10));
-            parsedMonth = Integer.parseInt(s.substring(0, 2));
-            parsedDay = Integer.parseInt(s.substring(3, 5));
-            if (parsedMonth > currentMonth) {
-                age = (currentYear - parsedYear) - 1;
+            try {
+                parsedYear = Integer.parseInt(s.substring(6, 10));
+                parsedMonth = Integer.parseInt(s.substring(0, 2));
+                parsedDay = Integer.parseInt(s.substring(3, 5));
+            } catch (NumberFormatException | StringIndexOutOfBoundsException e) {
+                System.out.println("Error parsing date: " + s);
+                continue; // Skip this entry if there's an error
             }
-            else if (parsedMonth == currentMonth) {
-                if (parsedDay > currentDay) {
-                    age = (currentYear - parsedYear) - 1;
+
+            if (parsedMonth > CURRENT_MONTH) {
+                age = (CURRENT_YEAR - parsedYear) - 1;
+            } else if (parsedMonth == CURRENT_MONTH) {
+                if (parsedDay > CURRENT_DAY) {
+                    age = (CURRENT_YEAR - parsedYear) - 1;
+                } else {
+                    age = CURRENT_YEAR - parsedYear;
                 }
-                else if (parsedDay == currentDay) {
-                    age = currentYear - parsedYear;
-                }
-                else {
-                    age = currentYear - parsedYear;
-                }
-            }
-            else {
-                age = currentYear - parsedYear;
+            } else {
+                age = CURRENT_YEAR - parsedYear;
             }
             ageList.add(age);
         }
         scan.close();
-        int sumOfPatientAges = 0;
 
+        int sumOfPatientAges = 0;
         for (Integer integer : ageList) {
             sumOfPatientAges += integer;
         }
-        double averagePatientAge = (double) sumOfPatientAges / ageList.size();
-        System.out.print("Average patient age: ");
-        System.out.printf("%.2f", averagePatientAge);
+
+        if (ageList.isEmpty()) {
+            return 0; // Avoid division by zero
+        }
+
+        return (double) sumOfPatientAges / ageList.size();
     }
+
 
     public static void sortPatientsByAge(String fileName) throws FileNotFoundException {
         File file = new File(fileName);
@@ -567,5 +652,22 @@ public class Utils {
 
         out.close();
         scan.close();
+    }
+
+    public static String[][] getPatientList(String fileName) throws FileNotFoundException {
+        File file = new File(fileName);
+        Scanner scan = new Scanner(file);
+        List<String> patientList = new ArrayList<>();
+        while (scan.hasNextLine()) {
+            String patientInfo = scan.nextLine();
+            patientList.add(patientInfo);
+        }
+        patientList.remove(0);
+        String[][] patientInformation = new String[patientList.size()][4];
+        for (int i = 0; i < patientList.size(); i++) {
+            String[] patientInfo = patientList.get(i).split("\\s+");
+            patientInformation[i] = patientInfo;
+        }
+        return patientInformation;
     }
 }

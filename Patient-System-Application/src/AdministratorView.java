@@ -1,22 +1,24 @@
-import ButtonActionFiles.AddPatient;
+import ButtonActionFiles.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileNotFoundException;
 
 public class AdministratorView extends JFrame {
     JButton addPatientButton;
     JButton deletePatientButton;
     JButton transferPatientButton;
-    JButton returnCountOfPatientButton;
+    JButton returnPatientCountButton;
     JButton returnAvgAgeButton;
+    JButton getPatientListButton;
     JButton sortPatientButton;
     JButton shufflePatientsButton;
-//    JButton logoutButton;
+    JButton logoutButton;
     JFrame administratorViewFrame;
     static JPanel administratorButtonPanel;
-    static JPanel administratorButtonActionViewPanel;
+    static JPanel administratorButtonViewPanel;
     public AdministratorView() {
         administratorViewFrame = new JFrame();
         administratorViewFrame.setPreferredSize(new Dimension(1440, 805));
@@ -24,55 +26,69 @@ public class AdministratorView extends JFrame {
         administratorViewFrame.setTitle("Patient System Application - Administrator View");
 
         addPatientButton = new JButton("Add Patient");
-        addPatientButton.setBounds(50, 50, 120, 50);
+        addPatientButton.setFont(new Font("Add Patient", Font.PLAIN, 14));
+        addPatientButton.setPreferredSize(new Dimension(123, 40));
         addPatientButton.addActionListener(new AddPatientButtonAction());
 
         deletePatientButton = new JButton("Delete Patient");
-        deletePatientButton.setBounds(50, 120, 120, 50);
+        deletePatientButton.setFont(new Font("Delete Patient", Font.PLAIN, 14));
+        deletePatientButton.setPreferredSize(new Dimension(138, 40));
         deletePatientButton.addActionListener(new DeletePatientButtonAction());
 
         transferPatientButton = new JButton("Transfer Patient");
-        transferPatientButton.setBounds(50, 190, 120, 50);
+        transferPatientButton.setFont(new Font("Transfer Patient", Font.PLAIN, 14));
+        transferPatientButton.setPreferredSize(new Dimension(153, 40));
         transferPatientButton.addActionListener(new TransferPatientButtonAction());
 
-        returnCountOfPatientButton = new JButton("Return Patient Count");
-        returnCountOfPatientButton.setBounds(50, 260, 120, 50);
-        returnCountOfPatientButton.addActionListener(new ReturnCountOfPatientButtonAction());
+        returnPatientCountButton = new JButton("Return Patient Count");
+        returnPatientCountButton.setFont(new Font("Return Patient Count", Font.PLAIN, 14));
+        returnPatientCountButton.setPreferredSize(new Dimension(187, 40));
+        returnPatientCountButton.addActionListener(new ReturnPatientCountButtonAction());
 
         returnAvgAgeButton = new JButton("Return Average Age of Patients");
-        returnAvgAgeButton.setBounds(50, 330, 120, 50);
+        returnAvgAgeButton.setFont(new Font("Return Average Age of Patients", Font.PLAIN, 14));
+        returnAvgAgeButton.setPreferredSize(new Dimension(257, 40));
         returnAvgAgeButton.addActionListener(new ReturnAvgAgeButtonAction());
 
+        getPatientListButton = new JButton("Get Patient List");
+        getPatientListButton.setFont(new Font("Get Patient List", Font.PLAIN, 14));
+        getPatientListButton.setPreferredSize(new Dimension(145, 40));
+        getPatientListButton.addActionListener(new GetPatientListButtonAction());
+
         sortPatientButton = new JButton("Sort Patients");
-        sortPatientButton.setBounds(50, 400, 120, 50);
+        sortPatientButton.setFont(new Font("Sort Patients", Font.PLAIN, 14));
+        sortPatientButton.setPreferredSize(new Dimension(130, 40));
         sortPatientButton.addActionListener(new SortPatientButtonAction());
 
         shufflePatientsButton = new JButton("Shuffle Patients");
-        shufflePatientsButton.setBounds(50, 470, 120, 50);
+        shufflePatientsButton.setFont(new Font("Shuffle Patients", Font.PLAIN, 14));
+        shufflePatientsButton.setPreferredSize(new Dimension(150, 40));
         shufflePatientsButton.addActionListener(new ShufflePatientButtonAction());
 
-//        logoutButton = new JButton("Logout");
-//        logoutButton.setBounds(50, 540, 120, 50);
-//        logoutButton.addActionListener(new LogoutButtonAction());
+        logoutButton = new JButton("Logout");
+        logoutButton.setFont(new Font("Logout", Font.PLAIN, 14));
+        logoutButton.setPreferredSize(new Dimension(92, 40));
+        logoutButton.addActionListener(new LogoutButtonAction());
 
         administratorButtonPanel = new JPanel();
         administratorButtonPanel.setSize(new Dimension(1440, 50));
-        administratorButtonPanel.setBackground(Color.GRAY);
+        administratorButtonPanel.setBackground(new Color(235, 65, 50));
         administratorButtonPanel.add(addPatientButton);
         administratorButtonPanel.add(deletePatientButton);
         administratorButtonPanel.add(transferPatientButton);
-        administratorButtonPanel.add(returnCountOfPatientButton);
+        administratorButtonPanel.add(returnPatientCountButton);
         administratorButtonPanel.add(returnAvgAgeButton);
+        administratorButtonPanel.add(getPatientListButton);
         administratorButtonPanel.add(sortPatientButton);
         administratorButtonPanel.add(shufflePatientsButton);
-//        administratorButtonPanel.add(logoutButton);
+        administratorButtonPanel.add(logoutButton);
 
-        administratorButtonActionViewPanel = new JPanel();
-        administratorButtonActionViewPanel.setSize(new Dimension(1440, 755));
-        administratorButtonActionViewPanel.setBackground(Color.LIGHT_GRAY);
+        administratorButtonViewPanel = new JPanel();
+        administratorButtonViewPanel.setSize(new Dimension(1440, 755));
+        administratorButtonViewPanel.setBackground(Color.LIGHT_GRAY);
 
         administratorViewFrame.add(administratorButtonPanel);
-        administratorViewFrame.add(administratorButtonActionViewPanel);
+        administratorViewFrame.add(administratorButtonViewPanel);
         administratorViewFrame.setResizable(true);
         administratorViewFrame.pack();
         administratorViewFrame.setVisible(true);
@@ -88,28 +104,47 @@ public class AdministratorView extends JFrame {
     private static class DeletePatientButtonAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
-
+            new DeletePatient();
         }
     }
 
     private static class TransferPatientButtonAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
-
+            new TransferPatient();
         }
     }
 
-    private static class ReturnCountOfPatientButtonAction implements ActionListener {
+    private static class ReturnPatientCountButtonAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
-
+            try {
+                new ReturnPatientCount();
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
     private static class ReturnAvgAgeButtonAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
+            try {
+                new ReturnAvgAge();
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
 
+    private static class GetPatientListButtonAction implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            try {
+                new GetPatientList();
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -127,11 +162,11 @@ public class AdministratorView extends JFrame {
         }
     }
 
-//    private static class LogoutButtonAction implements ActionListener {
-//        @Override
-//        public void actionPerformed(ActionEvent actionEvent) {
-//
-//        }
-//    }
+    private static class LogoutButtonAction implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            System.exit(0);
+        }
+    }
 
 }

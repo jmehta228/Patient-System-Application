@@ -60,6 +60,7 @@ public class LoginScreen extends JPanel {
                     passwordField.setEnabled(false);
                     loginButton.setEnabled(false);
                     new AdministratorView();
+                    PatientSystemApplication.mainFrame.dispose();
                 }
                 else {
                     usernameField.setEnabled(false);

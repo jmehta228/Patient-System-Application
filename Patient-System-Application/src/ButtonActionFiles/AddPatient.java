@@ -22,15 +22,14 @@ public class AddPatient extends JFrame {
         addPatientPanel = new JPanel(new GridLayout(8, 0));
 
         nameLabel = new JLabel("Name");
-        nameField = new JTextField(30);
-        nameField.setPreferredSize(new Dimension(30, 20));
+        nameField = new JTextField(40);
 
         birthdateLabel = new JLabel("Birthdate (MM/DD/YYYY)");
-        birthdateField = new JTextField(30);
-        birthdateField.setPreferredSize(new Dimension(30, 20));
+        birthdateField = new JTextField(40);
 
         submitButton = new JButton("Submit");
         submitButton.addActionListener(new SubmitButtonAction());
+        submitButton.setPreferredSize(new Dimension(100, 50));
 
         addPatientPanel = new JPanel();
         addPatientPanel.add(nameLabel);
@@ -40,7 +39,7 @@ public class AddPatient extends JFrame {
         addPatientPanel.add(submitButton);
 
         addPatientFrame.add(addPatientPanel);
-        addPatientFrame.setResizable(false);
+        addPatientFrame.setResizable(true);
         addPatientFrame.pack();
         addPatientFrame.setVisible(true);
     }
@@ -49,7 +48,12 @@ public class AddPatient extends JFrame {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             try {
-                if (Utils.addPatient(nameField.getText(), birthdateField.getText(), Utils.fileName).equals("Patient added")) {
+                String nameText = nameField.getText();
+                String birthdateText = birthdateField.getText();
+                if (nameText.isEmpty() || birthdateText.isEmpty()) {
+                    new AddPatientFailure();
+                }
+                else if (Utils.addPatient(nameField.getText(), birthdateField.getText(), Utils.fileName).equals("Patient added")) {
                     new AddPatientSuccess();
                 }
                 else {
@@ -73,7 +77,7 @@ class AddPatientSuccess extends JFrame {
         addPatientSuccessFrame.setResizable(false);
 
         JPanel addPatientSuccessPanel = new JPanel();
-        JLabel addPatientSuccessLabel = new JLabel("Correct username/password");
+        JLabel addPatientSuccessLabel = new JLabel("Success - Patient added");
         addPatientSuccessPanel.setFont(new Font("Calibri", Font.PLAIN, 15));
         addPatientSuccessPanel.add(addPatientSuccessLabel);
 
@@ -104,7 +108,7 @@ class AddPatientFailure extends JFrame {
         addPatientFailureFrame.setResizable(false);
 
         JPanel addPatientFailurePanel = new JPanel();
-        JLabel addPatientFailureLabel = new JLabel("Incorrect username/password");
+        JLabel addPatientFailureLabel = new JLabel("Failure - Patient not added");
         addPatientFailurePanel.setFont(new Font("Calibri", Font.PLAIN, 15));
         addPatientFailurePanel.add(addPatientFailureLabel);
 
