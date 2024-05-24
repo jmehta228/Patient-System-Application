@@ -7,12 +7,13 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 
 public class DeletePatient extends JFrame {
-    JFrame deletePatientFrame;
+    static JFrame deletePatientFrame;
     JLabel nameLabel;
     static JTextField nameField;
     JLabel birthdateLabel;
     static JTextField birthdateField;
     JButton submitButton;
+    JButton closeButton;
     JPanel deletePatientPanel;
     public DeletePatient() {
         deletePatientFrame = new JFrame("Patient System Application - Delete Patient");
@@ -31,12 +32,17 @@ public class DeletePatient extends JFrame {
         submitButton.setPreferredSize(new Dimension(100, 50));
         submitButton.addActionListener(new SubmitButtonAction());
 
+        closeButton = new JButton("Close");
+        closeButton.setPreferredSize(new Dimension(100, 50));
+        closeButton.addActionListener(new CloseButtonAction());
+
         deletePatientPanel = new JPanel();
         deletePatientPanel.add(nameLabel);
         deletePatientPanel.add(nameField);
         deletePatientPanel.add(birthdateLabel);
         deletePatientPanel.add(birthdateField);
         deletePatientPanel.add(submitButton);
+        deletePatientPanel.add(closeButton);
 
         deletePatientFrame.add(deletePatientPanel);
         deletePatientFrame.setResizable(true);
@@ -64,6 +70,13 @@ public class DeletePatient extends JFrame {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+        }
+    }
+
+    private static class CloseButtonAction implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            deletePatientFrame.dispose();
         }
     }
 }

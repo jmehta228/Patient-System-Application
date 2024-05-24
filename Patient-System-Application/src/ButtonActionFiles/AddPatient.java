@@ -13,6 +13,7 @@ public class AddPatient extends JFrame {
     JLabel birthdateLabel;
     static JTextField birthdateField;
     JButton submitButton;
+    JButton closeButton;
     static JPanel addPatientPanel;
     public AddPatient() {
         addPatientFrame = new JFrame("Patient System Application - Add Patient");
@@ -31,12 +32,17 @@ public class AddPatient extends JFrame {
         submitButton.addActionListener(new SubmitButtonAction());
         submitButton.setPreferredSize(new Dimension(100, 50));
 
+        closeButton = new JButton("Close");
+        closeButton.addActionListener(new CloseButtonAction());
+        closeButton.setPreferredSize(new Dimension(100, 50));
+
         addPatientPanel = new JPanel();
         addPatientPanel.add(nameLabel);
         addPatientPanel.add(nameField);
         addPatientPanel.add(birthdateLabel);
         addPatientPanel.add(birthdateField);
         addPatientPanel.add(submitButton);
+        addPatientPanel.add(closeButton);
 
         addPatientFrame.add(addPatientPanel);
         addPatientFrame.setResizable(true);
@@ -64,6 +70,13 @@ public class AddPatient extends JFrame {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+        }
+    }
+
+    private static class CloseButtonAction implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            addPatientFrame.dispose();
         }
     }
 }

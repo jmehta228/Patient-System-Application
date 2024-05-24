@@ -6,12 +6,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.FileNotFoundException;
 
-public class ReturnAvgAge extends JFrame {
+public class ReturnAverageAge extends JFrame {
     static JFrame returnAvgAgeFrame;
     JPanel returnAvgAgePanel;
     JLabel avgAgeLabel;
     JButton closeButton;
-    public ReturnAvgAge() throws FileNotFoundException {
+    public ReturnAverageAge() throws FileNotFoundException {
         returnAvgAgeFrame = new JFrame("Patient System Application - Return Average Patient Age");
         returnAvgAgeFrame.setPreferredSize(new Dimension(500, 500));
         returnAvgAgeFrame.setLocation(500, 200);

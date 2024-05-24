@@ -9,9 +9,14 @@ public class LoadingWindow extends JWindow {
         loadingWindow.setContentPane(contentPane);
         JLabel loadingWindowLabel = new JLabel(getLoadingWindowString(), SwingConstants.CENTER);
         loadingWindowLabel.setFont(new Font("Calibri", Font.PLAIN, 20));
-        loadingWindow.getContentPane().add(loadingWindowLabel);
+        loadingWindow.add(loadingWindowLabel);
         loadingWindow.setBounds(495, 150, 530, 350);
         loadingWindow.setVisible(true);
+
+        ImageIcon imageIcon = new ImageIcon("./images/patient-system-application-logo.png");
+        JLabel label = new JLabel(imageIcon);
+        loadingWindow.getContentPane().add(label);
+
         try {
             Thread.sleep(3000);
         }

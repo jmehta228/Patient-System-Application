@@ -9,11 +9,11 @@ import javax.swing.table.DefaultTableModel;
 
 public class GetPatientList extends JFrame {
     static JFrame getPatientListFrame;
-    JPanel getPatientListPanel;
     static String[][] patientInformation;
     static String[] categories;
     JTable table;
     JButton closeButton;
+    JScrollPane scrollPane;
     public GetPatientList() throws FileNotFoundException {
         getPatientListFrame = new JFrame("Patient System Application - Get Patient List");
         getPatientListFrame.setSize(new Dimension(500, 200));
@@ -27,12 +27,10 @@ public class GetPatientList extends JFrame {
 
         closeButton = new JButton("Close");
         closeButton.addActionListener(new CloseButtonAction());
-
-        getPatientListPanel = new JPanel();
-        getPatientListPanel.add(new JScrollPane(table));
-        getPatientListPanel.add(closeButton);
-
-        getPatientListFrame.add(getPatientListPanel);
+        closeButton.setPreferredSize(new Dimension(100, 50));
+        scrollPane = new JScrollPane(table);
+        getPatientListFrame.add(scrollPane);
+//        getPatientListFrame.add(closeButton);
         getPatientListFrame.setResizable(true);
         getPatientListFrame.pack();
         getPatientListFrame.setVisible(true);

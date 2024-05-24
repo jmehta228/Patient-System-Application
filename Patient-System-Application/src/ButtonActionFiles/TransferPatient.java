@@ -7,12 +7,13 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 
 public class TransferPatient extends JFrame {
-    JFrame transferPatientFrame;
+    static JFrame transferPatientFrame;
     JLabel nameLabel;
     static JTextField nameField;
     JLabel birthdateLabel;
     static JTextField birthdateField;
     JButton submitButton;
+    JButton closeButton;
     JPanel transferPatientPanel;
     public TransferPatient() {
         transferPatientFrame = new JFrame("Patient System Application - Transfer Patient");
@@ -31,12 +32,17 @@ public class TransferPatient extends JFrame {
         submitButton.setPreferredSize(new Dimension(100, 50));
         submitButton.addActionListener(new SubmitButtonAction());
 
+        closeButton = new JButton("Close");
+        closeButton.setPreferredSize(new Dimension(100, 50));
+        closeButton.addActionListener(new CloseButtonAction());
+
         transferPatientPanel = new JPanel();
         transferPatientPanel.add(nameLabel);
         transferPatientPanel.add(nameField);
         transferPatientPanel.add(birthdateLabel);
         transferPatientPanel.add(birthdateField);
         transferPatientPanel.add(submitButton);
+        transferPatientPanel.add(closeButton);
 
         transferPatientFrame.add(transferPatientPanel);
         transferPatientFrame.setResizable(true);
@@ -64,6 +70,13 @@ public class TransferPatient extends JFrame {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+        }
+    }
+
+    private static class CloseButtonAction implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            transferPatientFrame.dispose();
         }
     }
 }

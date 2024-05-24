@@ -14,7 +14,7 @@ public class AdministratorView extends JFrame {
     JButton returnAvgAgeButton;
     JButton getPatientListButton;
     JButton sortPatientButton;
-    JButton shufflePatientsButton;
+    JButton downloadCSVButton;
     JButton logoutButton;
     JFrame administratorViewFrame;
     static JPanel administratorButtonPanel;
@@ -22,7 +22,6 @@ public class AdministratorView extends JFrame {
     public AdministratorView() {
         administratorViewFrame = new JFrame();
         administratorViewFrame.setPreferredSize(new Dimension(1440, 805));
-        administratorViewFrame.setResizable(false);
         administratorViewFrame.setTitle("Patient System Application - Administrator View");
 
         addPatientButton = new JButton("Add Patient");
@@ -60,10 +59,10 @@ public class AdministratorView extends JFrame {
         sortPatientButton.setPreferredSize(new Dimension(130, 40));
         sortPatientButton.addActionListener(new SortPatientButtonAction());
 
-        shufflePatientsButton = new JButton("Shuffle Patients");
-        shufflePatientsButton.setFont(new Font("Shuffle Patients", Font.PLAIN, 14));
-        shufflePatientsButton.setPreferredSize(new Dimension(150, 40));
-        shufflePatientsButton.addActionListener(new ShufflePatientButtonAction());
+        downloadCSVButton = new JButton("Download CSV");
+        downloadCSVButton.setFont(new Font("Download CSV", Font.PLAIN, 14));
+        downloadCSVButton.setPreferredSize(new Dimension(144, 40));
+        downloadCSVButton.addActionListener(new DownloadCSVButtonAction());
 
         logoutButton = new JButton("Logout");
         logoutButton.setFont(new Font("Logout", Font.PLAIN, 14));
@@ -80,7 +79,7 @@ public class AdministratorView extends JFrame {
         administratorButtonPanel.add(returnAvgAgeButton);
         administratorButtonPanel.add(getPatientListButton);
         administratorButtonPanel.add(sortPatientButton);
-        administratorButtonPanel.add(shufflePatientsButton);
+        administratorButtonPanel.add(downloadCSVButton);
         administratorButtonPanel.add(logoutButton);
 
         administratorButtonViewPanel = new JPanel();
@@ -89,7 +88,7 @@ public class AdministratorView extends JFrame {
 
         administratorViewFrame.add(administratorButtonPanel);
         administratorViewFrame.add(administratorButtonViewPanel);
-        administratorViewFrame.setResizable(true);
+        administratorViewFrame.setResizable(false);
         administratorViewFrame.pack();
         administratorViewFrame.setVisible(true);
     }
@@ -130,7 +129,7 @@ public class AdministratorView extends JFrame {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             try {
-                new ReturnAvgAge();
+                new ReturnAverageAge();
             } catch (FileNotFoundException e) {
                 throw new RuntimeException(e);
             }
@@ -151,14 +150,14 @@ public class AdministratorView extends JFrame {
     private static class SortPatientButtonAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
-
+            new SortPatients();
         }
     }
 
-    private static class ShufflePatientButtonAction implements ActionListener {
+    private static class DownloadCSVButtonAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
-
+            new DownloadCSV();
         }
     }
 
@@ -168,5 +167,4 @@ public class AdministratorView extends JFrame {
             System.exit(0);
         }
     }
-
 }

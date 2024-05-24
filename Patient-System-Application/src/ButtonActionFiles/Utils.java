@@ -1,16 +1,21 @@
 package ButtonActionFiles;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
+import java.nio.file.*;
 import java.time.LocalDate;
-import java.time.Year;
 import java.time.ZoneId;
 import java.util.*;
 
 public class Utils {
     final static String fileName = "patientRecords.txt";
+
+    static Date date = new Date();
+    static LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+    final static int CURRENT_MONTH = localDate.getMonthValue();
+    final static int CURRENT_DAY = localDate.getDayOfMonth();
+    final static int CURRENT_YEAR = localDate.getYear();
+
     public static String isBirthValid(int month, int day, int year) {
         //check if the given birth is valid.
         String stringMonth = "";
@@ -230,69 +235,6 @@ public class Utils {
         }
     }
 
-//    public static double averageAge(String fileName) throws FileNotFoundException {
-//        // find the average age for all patients in the file
-//        File file = new File(fileName);
-//        Scanner scan = new Scanner(file);
-//        ArrayList<String> patientList = new ArrayList<>();
-//        ArrayList<String> birthDateList = new ArrayList<>();
-//        ArrayList<Integer> ageList = new ArrayList<>();
-//
-//        //PrintWriter out = new PrintWriter(fileName);
-//        int currentMonth = 4;
-//        int currentDay = 12;
-//        int currentYear = 2022;
-//
-//        while (scan.hasNextLine()) {
-//            String patient = scan.nextLine();
-//            patientList.add(patient);
-//        }
-//
-//        for (String s : patientList) {
-//            if (s.contains("sick")) {
-//                birthDateList.add(s.substring(s.length() - 15, s.length() - 5));
-//            } else {
-//                birthDateList.add(s.substring(s.length() - 18, s.length() - 8));
-//            }
-//        }
-//
-//        int age;
-//        int parsedYear;
-//        int parsedMonth;
-//        int parsedDay;
-//
-//        for (String s : birthDateList) {
-//            parsedYear = Integer.parseInt(s.substring(6, 10));
-//            parsedMonth = Integer.parseInt(s.substring(0, 2));
-//            parsedDay = Integer.parseInt(s.substring(3, 5));
-//            if (parsedMonth > currentMonth) {
-//                age = (currentYear - parsedYear) - 1;
-//            }
-//            else if (parsedMonth == currentMonth) {
-//                if (parsedDay > currentDay) {
-//                    age = (currentYear - parsedYear) - 1;
-//                }
-//                else if (parsedDay == currentDay) {
-//                    age = currentYear - parsedYear;
-//                }
-//                else {
-//                    age = currentYear - parsedYear;
-//                }
-//            }
-//            else {
-//                age = currentYear - parsedYear;
-//            }
-//            ageList.add(age);
-//        }
-//        scan.close();
-//        int sumOfPatientAges = 0;
-//
-//        for (Integer integer : ageList) {
-//            sumOfPatientAges += integer;
-//        }
-//        return (double) sumOfPatientAges / ageList.size();
-//    }
-
     public static double averageAge(String fileName) throws FileNotFoundException {
         // find the average age for all patients in the file
         File file = new File(fileName);
@@ -305,12 +247,6 @@ public class Utils {
         ArrayList<String> patientList = new ArrayList<>();
         ArrayList<String> birthDateList = new ArrayList<>();
         ArrayList<Integer> ageList = new ArrayList<>();
-
-        Date date = new Date();
-        LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        final int CURRENT_MONTH = localDate.getMonthValue();
-        final int CURRENT_DAY = localDate.getDayOfMonth();
-        final int CURRENT_YEAR = localDate.getYear();
 
         while (scan.hasNextLine()) {
             String patient = scan.nextLine();
@@ -343,7 +279,7 @@ public class Utils {
                 parsedDay = Integer.parseInt(s.substring(3, 5));
             } catch (NumberFormatException | StringIndexOutOfBoundsException e) {
                 System.out.println("Error parsing date: " + s);
-                continue; // Skip this entry if there's an error
+                continue;
             }
 
             if (parsedMonth > CURRENT_MONTH) {
@@ -367,7 +303,7 @@ public class Utils {
         }
 
         if (ageList.isEmpty()) {
-            return 0; // Avoid division by zero
+            return 0;
         }
 
         return (double) sumOfPatientAges / ageList.size();
@@ -377,105 +313,67 @@ public class Utils {
     public static void sortPatientsByAge(String fileName) throws FileNotFoundException {
         File file = new File(fileName);
         Scanner scan = new Scanner(file);
-        //PrintWriter out = new PrintWriter(file);
+
         ArrayList<String> patientList = new ArrayList<>();
         ArrayList<String> birthDateList = new ArrayList<>();
         ArrayList<Integer> ageList = new ArrayList<>();
-        ArrayList<String> ageListString = new ArrayList<>();
         ArrayList<String> newPatientList = new ArrayList<>();
 
         while (scan.hasNextLine()) {
             String patient = scan.nextLine();
             patientList.add(patient);
         }
+        scan.close();
 
-        for (String s : patientList) {
-            if (s.contains("sick")) {
-                birthDateList.add(s.substring(s.length() - 15, s.length() - 5));
+        for (String patient : patientList) {
+            String birthDate;
+            if (patient.contains("sick")) {
+                birthDate = patient.substring(patient.length() - 15, patient.length() - 5);
+            } else {
+                birthDate = patient.substring(patient.length() - 18, patient.length() - 8);
             }
-            else {
-                birthDateList.add(s.substring(s.length() - 18, s.length() - 8));
-            }
+            birthDateList.add(birthDate);
         }
 
-        int currentMonth = 4;
-        int currentDay = 12;
-        int currentYear = 2022;
+        for (String birthDate : birthDateList) {
+            int parsedYear = Integer.parseInt(birthDate.substring(6, 10));
+            int parsedMonth = Integer.parseInt(birthDate.substring(0, 2));
+            int parsedDay = Integer.parseInt(birthDate.substring(3, 5));
 
-        int age;
-        int parsedYear;
-        int parsedMonth;
-        int parsedDay;
-        for (String s : birthDateList) {
-            parsedYear = Integer.parseInt(s.substring(6, 10));
-            parsedMonth = Integer.parseInt(s.substring(0, 2));
-            parsedDay = Integer.parseInt(s.substring(3, 5));
-            if (parsedMonth > currentMonth) {
-                age = (currentYear - parsedYear) - 1;
-            }
-            else if (parsedMonth == currentMonth) {
-                if (parsedDay > currentDay) {
-                    age = (currentYear - parsedYear) - 1;
-                }
-                else if (parsedDay == currentDay) {
-                    age = currentYear - parsedYear;
-                }
-                else {
-                    age = currentYear - parsedYear;
-                }
-            }
-            else {
-                age = currentYear - parsedYear;
+            int age = CURRENT_YEAR - parsedYear;
+            if (parsedMonth > CURRENT_MONTH || (parsedMonth == CURRENT_MONTH && parsedDay > CURRENT_DAY)) {
+                age--;
             }
             ageList.add(age);
         }
 
-
-        for (Integer integer : ageList) {
-            ageListString.add(integer.toString());
+        for (int i = 0; i < patientList.size(); i++) {
+            patientList.set(i, patientList.get(i) + " " + ageList.get(i));
         }
 
         for (int i = 0; i < ageList.size(); i++) {
-            for (int k = 0; k < ageList.size(); k++) {
-                int tempOne = ageList.get(i);
-                int tempTwo = ageList.get(k);
-                if (tempOne < tempTwo) {
-                    ageList.set(i, tempTwo);
-                    ageList.set(k, tempOne);
+            for (int j = i + 1; j < ageList.size(); j++) {
+                if (ageList.get(i) > ageList.get(j)) {
+                    int tempAge = ageList.get(i);
+                    ageList.set(i, ageList.get(j));
+                    ageList.set(j, tempAge);
+
+                    String tempPatient = patientList.get(i);
+                    patientList.set(i, patientList.get(j));
+                    patientList.set(j, tempPatient);
                 }
             }
         }
 
-        for (int i = 0; i < ageListString.size(); i++) {
-            patientList.set(i, patientList.get(i) + " " + ageListString.get(i));
+        for (String patient : patientList) {
+            newPatientList.add(patient.substring(0, patient.lastIndexOf(' ')));
         }
 
-        for (int i = 0; i < patientList.size(); i++) {
-            patientList.set(i, patientList.get(i).replace(' ', '-'));
-        }
-
-        for (Integer integer : ageList) {
-            for (String s : patientList) {
-                if (integer == (Integer.parseInt(s.substring(s.length() - 2, s.length())))) {
-                    newPatientList.add(s);
-                }
-            }
-        }
-
-        for (int i = 0; i < newPatientList.size(); i++) {
-            newPatientList.set(i, newPatientList.get(i).replace('-', ' '));
-        }
-
-        for (int i = 0; i < newPatientList.size(); i++) {
-            newPatientList.set(i, newPatientList.get(i).substring(0, newPatientList.get(i).length()-3));
-        }
-
-        PrintWriter out = new PrintWriter(fileName);
-        for (String s : newPatientList) {
-            out.println(s);
+        PrintWriter out = new PrintWriter(file);
+        for (String patient : newPatientList) {
+            out.println(patient);
         }
         out.close();
-        scan.close();
     }
 
     public static void sortPatientsByName(String firstOrLast, String fileName) throws FileNotFoundException {
@@ -502,7 +400,7 @@ public class Utils {
             }
 
             for (String s : patientList) { // taking the first letter of patients first name and adding to arraylist (String)
-                patientFirstLetterFirstNameList.add(s.substring(0,1));
+                patientFirstLetterFirstNameList.add(s.substring(0, 1));
             }
 
             for (String s : patientFirstLetterFirstNameList) { // taking the first letter of patients first name and adding to arraylist (char)
@@ -530,7 +428,6 @@ public class Utils {
 
             for (Integer integer : patientFirstNameFirstCharDecList) {
                 for (String s : patientList) {
-                    //char c = patientList.get(i).charAt(0);
                     if (integer == ((int) (s.substring(s.length() - 1)).charAt(0))) {
                         newPatientList.add(s);
                     }
@@ -547,7 +444,7 @@ public class Utils {
             }
 
             for (int i = 0; i < newPatientList.size(); i++) {
-                newPatientList.set(i, newPatientList.get(i).substring(0, newPatientList.get(i).length()-2));
+                newPatientList.set(i, newPatientList.get(i).substring(0, newPatientList.get(i).length() - 2));
             }
 
             PrintWriter out = new PrintWriter(fileName);
@@ -556,9 +453,7 @@ public class Utils {
             }
             out.close();
             scan.close();
-        }
-
-        else if (firstOrLast.equals("last")) {
+        } else if (firstOrLast.equals("last")) {
             ArrayList<String> lastNamesOfPatients = new ArrayList<>();
             while (scan.hasNextLine()) {
                 String patient = scan.nextLine();
@@ -568,7 +463,7 @@ public class Utils {
             }
 
             for (String s : lastNamesOfPatients) { // taking the first letter of patients last name and adding to arraylist (String)
-                patientFirstLetterLastNameList.add(s.substring(0,1));
+                patientFirstLetterLastNameList.add(s.substring(0, 1));
             }
 
             for (String s : patientFirstLetterLastNameList) { // taking the first letter of patients last name and adding to arraylist (char)
@@ -625,35 +520,6 @@ public class Utils {
         }
     }
 
-    public static void shufflePatients(String fileName) throws FileNotFoundException {
-        // modify file by shuffle all patients, so they are not in any order
-        // Using random in this method is required.
-        File file = new File(fileName);
-        Scanner scan = new Scanner(file);
-        ArrayList<String> patientList = new ArrayList<>();
-        Random r = new Random();
-
-
-        while (scan.hasNextLine()) {
-            String patient = scan.nextLine();
-            patientList.add(patient);
-        }
-
-        final int PATIENT_LENGTH = patientList.size();
-        for (int k = PATIENT_LENGTH - 1; k >= 1; k--) {
-            Collections.swap(patientList, k, r.nextInt(k + 1));
-        }
-
-        PrintWriter out = new PrintWriter(file);
-
-        for (String s : patientList) {
-            out.println(s);
-        }
-
-        out.close();
-        scan.close();
-    }
-
     public static String[][] getPatientList(String fileName) throws FileNotFoundException {
         File file = new File(fileName);
         Scanner scan = new Scanner(file);
@@ -669,5 +535,43 @@ public class Utils {
             patientInformation[i] = patientInfo;
         }
         return patientInformation;
+    }
+
+    public static boolean convertTextToCSV(String inputFilePath, String outputFilePath) {
+        boolean output = false;
+        try (BufferedReader reader = new BufferedReader(new FileReader(inputFilePath));
+             BufferedWriter writer = new BufferedWriter(new FileWriter(outputFilePath))) {
+
+            String line;
+            boolean firstLine = true;
+            while ((line = reader.readLine()) != null) {
+                if (firstLine) {
+                    firstLine = false;
+                    continue;
+                }
+                String[] columns = line.split("\\s+");
+                String csvLine = String.join(",", columns);
+                writer.write(csvLine);
+                writer.newLine();
+            }
+            output = true;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return output;
+    }
+
+    public static void copyFileToDownloads(String sourceFilePath) {
+        String userHome = System.getProperty("user.home");
+        String downloadsFolderPath = userHome + File.separator + "Downloads";
+        Path sourcePath = Paths.get(sourceFilePath);
+        String fileName = sourcePath.getFileName().toString();
+        Path destinationPath = Paths.get(downloadsFolderPath, fileName);
+        try {
+            Files.copy(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
+            System.out.println("File copied successfully to: " + destinationPath);
+        } catch (IOException e) {
+            System.err.println("Error copying the file: " + e.getMessage());
+        }
     }
 }
