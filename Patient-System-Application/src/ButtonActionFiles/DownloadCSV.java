@@ -33,7 +33,7 @@ public class DownloadCSV extends JFrame {
     private static class DownloadCSVButtonAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
-            if (Utils.convertTextToCSV(Utils.fileName, "patientRecords.csv")) {
+            if (Utils.convertTextToCSV(Utils.FILE_NAME, "patientRecords.csv")) {
                 Utils.copyFileToDownloads("patientRecords.csv");
                 new DownloadCSVSuccess();
             }

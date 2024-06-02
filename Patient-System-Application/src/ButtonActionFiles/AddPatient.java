@@ -59,7 +59,7 @@ public class AddPatient extends JFrame {
                 if (nameText.isEmpty() || birthdateText.isEmpty()) {
                     new AddPatientFailure();
                 }
-                else if (Utils.addPatient(nameField.getText(), birthdateField.getText(), Utils.fileName).equals("Patient added")) {
+                else if (Utils.addPatient(nameField.getText(), birthdateField.getText(), Utils.FILE_NAME).equals("Patient added")) {
                     new AddPatientSuccess();
                 }
                 else {

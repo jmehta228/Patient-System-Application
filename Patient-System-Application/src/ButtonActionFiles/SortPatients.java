@@ -30,7 +30,7 @@ public class SortPatients extends JFrame {
         sortPatientsByLastNameButton.addActionListener(new SortPatientsByLastName());
         closeButton.addActionListener(new CloseButtonAction());
 
-//        sortPatientsPanel.add(sortPatientsByAgeButton);
+        sortPatientsPanel.add(sortPatientsByAgeButton);
         sortPatientsPanel.add(sortPatientsByFirstNameButton);
         sortPatientsPanel.add(sortPatientsByLastNameButton);
         sortPatientsPanel.add(closeButton);
@@ -45,7 +45,7 @@ public class SortPatients extends JFrame {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             try {
-                Utils.sortPatientsByAge(Utils.fileName);
+                Utils.sortPatientsByAge(Utils.FILE_NAME);
             } catch (FileNotFoundException e) {
                 throw new RuntimeException(e);
             }
@@ -55,7 +55,7 @@ public class SortPatients extends JFrame {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             try {
-                Utils.sortPatientsByName("first", Utils.fileName);
+                Utils.sortPatientsByName("first", Utils.FILE_NAME);
             } catch (FileNotFoundException e) {
                 throw new RuntimeException(e);
             }
@@ -65,7 +65,7 @@ public class SortPatients extends JFrame {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             try {
-                Utils.sortPatientsByName("last", Utils.fileName);
+                Utils.sortPatientsByName("last", Utils.FILE_NAME);
             } catch (FileNotFoundException e) {
                 throw new RuntimeException(e);
             }

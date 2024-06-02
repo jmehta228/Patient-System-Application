@@ -59,10 +59,10 @@ public class DeletePatient extends JFrame {
                 if (nameText.isEmpty() || birthdateText.isEmpty()) {
                     new TransferPatientFailure();
                 }
-                else if (Utils.deletePatient(nameText, birthdateText, Utils.fileName)) {
+                else if (Utils.deletePatient(nameText, birthdateText, Utils.FILE_NAME)) {
                     new DeletePatientSuccess();
                 }
-                else if (!Utils.deletePatient(nameText, birthdateText, Utils.fileName)) {
+                else if (!Utils.deletePatient(nameText, birthdateText, Utils.FILE_NAME)) {
                     new TransferPatientFailure();
                 }
                 nameField.setText("");

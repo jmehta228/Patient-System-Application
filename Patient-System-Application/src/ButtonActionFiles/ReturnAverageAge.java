@@ -18,7 +18,7 @@ public class ReturnAverageAge extends JFrame {
 
         returnAvgAgePanel = new JPanel();
 
-        avgAgeLabel = new JLabel("Average Patient Age: " + String.format("%.2f", Utils.averageAge(Utils.fileName)));
+        avgAgeLabel = new JLabel("Average Patient Age: " + String.format("%.2f", Utils.averageAge(Utils.FILE_NAME)));
         closeButton = new JButton("Close");
         closeButton.addActionListener(new CloseButtonAction());
 

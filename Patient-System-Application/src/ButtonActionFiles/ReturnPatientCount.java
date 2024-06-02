@@ -18,7 +18,7 @@ public class ReturnPatientCount extends JFrame {
 
         returnPatientCountPanel = new JPanel();
 
-        countLabel = new JLabel("Sick count: " + Utils.countPatients("sick", Utils.fileName) + "\nRecovered count: " + Utils.countPatients("recover", Utils.fileName));
+        countLabel = new JLabel("Sick count: " + Utils.countPatients("sick", Utils.FILE_NAME) + "\nRecovered count: " + Utils.countPatients("recover", Utils.FILE_NAME));
 
         closeButton = new JButton("Close");
         closeButton.addActionListener(new CloseButtonAction());

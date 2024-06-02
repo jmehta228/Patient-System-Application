@@ -19,7 +19,7 @@ public class GetPatientList extends JFrame {
         getPatientListFrame.setSize(new Dimension(500, 200));
         getPatientListFrame.setLocation(new Point(500, 200));
 
-        patientInformation = Utils.getPatientList(Utils.fileName);
+        patientInformation = Utils.getPatientList(Utils.FILE_NAME);
         categories = new String[]{"First Name", "Last Name", "Birthdate", "Status"};
 
         NonEditableTableModel model = new NonEditableTableModel(patientInformation, categories);

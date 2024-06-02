@@ -7,7 +7,7 @@ import java.time.ZoneId;
 import java.util.*;
 
 public class Utils {
-    final static String fileName = "patientRecords.txt";
+    final static String FILE_NAME = "patientRecords.txt";
 
     static Date date = new Date();
     static LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
@@ -103,7 +103,7 @@ public class Utils {
             day = Integer.parseInt(birth.substring(3, 5));
         }
         int year = Integer.parseInt(birth.substring(6, 10));
-        ArrayList<String> patientList = new ArrayList<>();
+        List<String> patientList = new ArrayList<>();
         File file = new File(fileName);
         Scanner scan = new Scanner(file);
         while (scan.hasNextLine()) {
@@ -114,20 +114,18 @@ public class Utils {
             patientAddStatus = "Patient not added";
         }
         else {
+            if (patientList.contains(name + " " + isBirthValid(month, day, year) + " sick")) {
+                return "Patient not added";
+            }
             patientList.add(name + " " + isBirthValid(month, day, year) + " sick");
-
             PrintWriter out = new PrintWriter(file);
-
             for (String s : patientList) {
                 out.println(s);
             }
-
             patientAddStatus = "Patient added";
             out.close();
-
         }
         scan.close();
-
         return patientAddStatus;
     }
 
@@ -140,7 +138,7 @@ public class Utils {
         // Otherwise, delete the first patient who is not sick.
         File file = new File(fileName);
         Scanner scan = new Scanner(file);
-        ArrayList<String> patientList = new ArrayList<>();
+        List<String> patientList = new ArrayList<>();
         boolean output = false;
 
         while (scan.hasNextLine()) {
@@ -167,7 +165,7 @@ public class Utils {
     public static boolean transferPatient(String name, String birthdate, String fileName) throws IOException {
         File file = new File(fileName);
         Scanner scan = new Scanner(file);
-        ArrayList<String> patientList = new ArrayList<>();
+        List<String> patientList = new ArrayList<>();
         boolean output = false;
 
         while (scan.hasNextLine()) {
@@ -201,7 +199,7 @@ public class Utils {
         // if client given “” (empty string), then return the total number of patients.
         File file = new File(fileName);
         Scanner scan = new Scanner(file);
-        ArrayList<String> patientList = new ArrayList<>();
+        List<String> patientList = new ArrayList<>();
         int sickCount = 0;
         int recoverCount = 0;
         int totalCount = 0;
@@ -244,9 +242,9 @@ public class Utils {
         }
 
         Scanner scan = new Scanner(file);
-        ArrayList<String> patientList = new ArrayList<>();
-        ArrayList<String> birthDateList = new ArrayList<>();
-        ArrayList<Integer> ageList = new ArrayList<>();
+        List<String> patientList = new ArrayList<>();
+        List<String> birthDateList = new ArrayList<>();
+        List<Integer> ageList = new ArrayList<>();
 
         while (scan.hasNextLine()) {
             String patient = scan.nextLine();
@@ -310,14 +308,59 @@ public class Utils {
     }
 
 
+    private static int[] parseBirthdate(String birthdate) {
+        String[] parts = birthdate.split("/");
+        int month = Integer.parseInt(parts[0]);
+        int day = Integer.parseInt(parts[1]);
+        int year = Integer.parseInt(parts[2]);
+        return new int[]{year, month, day};
+    }
+
+    private static int compareBirthdates(String birthdate1, String birthdate2) {
+        int[] date1 = parseBirthdate(birthdate1);
+        int[] date2 = parseBirthdate(birthdate2);
+        for (int i = 0; i < 3; i++) {
+            if (date1[i] != date2[i]) {
+                return Integer.compare(date1[i], date2[i]);
+            }
+        }
+        return 0;
+    }
+
+    private static int partition(List<Patient> patients, int low, int high) {
+        String pivot = patients.get(high).getBirthdate();
+        int i = low - 1;
+        for (int j = low; j < high; j++) {
+            if (compareBirthdates(patients.get(j).getBirthdate(), pivot) <= 0) {
+                i++;
+                Patient temp = patients.get(i);
+                patients.set(i, patients.get(j));
+                patients.set(j, temp);
+            }
+        }
+        Patient temp = patients.get(i + 1);
+        patients.set(i + 1, patients.get(high));
+        patients.set(high, temp);
+        return i + 1;
+    }
+
+    private static void quickSort(List<Patient> patients, int low, int high) {
+        if (low < high) {
+            int pi = partition(patients, low, high);
+            quickSort(patients, low, pi - 1);
+            quickSort(patients, pi + 1, high);
+        }
+    }
+
     public static void sortPatientsByAge(String fileName) throws FileNotFoundException {
         File file = new File(fileName);
         Scanner scan = new Scanner(file);
+        List<String> patientList = new ArrayList<>();
+        List<Patient> patientObjList = new ArrayList<>();
 
-        ArrayList<String> patientList = new ArrayList<>();
-        ArrayList<String> birthDateList = new ArrayList<>();
-        ArrayList<Integer> ageList = new ArrayList<>();
-        ArrayList<String> newPatientList = new ArrayList<>();
+        if (scan.hasNextLine()) {
+            scan.nextLine();
+        }
 
         while (scan.hasNextLine()) {
             String patient = scan.nextLine();
@@ -325,53 +368,15 @@ public class Utils {
         }
         scan.close();
 
-        for (String patient : patientList) {
-            String birthDate;
-            if (patient.contains("sick")) {
-                birthDate = patient.substring(patient.length() - 15, patient.length() - 5);
-            } else {
-                birthDate = patient.substring(patient.length() - 18, patient.length() - 8);
-            }
-            birthDateList.add(birthDate);
+        for (String s : patientList) {
+            patientObjList.add(new Patient(s));
         }
 
-        for (String birthDate : birthDateList) {
-            int parsedYear = Integer.parseInt(birthDate.substring(6, 10));
-            int parsedMonth = Integer.parseInt(birthDate.substring(0, 2));
-            int parsedDay = Integer.parseInt(birthDate.substring(3, 5));
-
-            int age = CURRENT_YEAR - parsedYear;
-            if (parsedMonth > CURRENT_MONTH || (parsedMonth == CURRENT_MONTH && parsedDay > CURRENT_DAY)) {
-                age--;
-            }
-            ageList.add(age);
-        }
-
-        for (int i = 0; i < patientList.size(); i++) {
-            patientList.set(i, patientList.get(i) + " " + ageList.get(i));
-        }
-
-        for (int i = 0; i < ageList.size(); i++) {
-            for (int j = i + 1; j < ageList.size(); j++) {
-                if (ageList.get(i) > ageList.get(j)) {
-                    int tempAge = ageList.get(i);
-                    ageList.set(i, ageList.get(j));
-                    ageList.set(j, tempAge);
-
-                    String tempPatient = patientList.get(i);
-                    patientList.set(i, patientList.get(j));
-                    patientList.set(j, tempPatient);
-                }
-            }
-        }
-
-        for (String patient : patientList) {
-            newPatientList.add(patient.substring(0, patient.lastIndexOf(' ')));
-        }
+        quickSort(patientObjList, 0, patientObjList.size() - 1);
 
         PrintWriter out = new PrintWriter(file);
-        for (String patient : newPatientList) {
-            out.println(patient);
+        for (Patient patient : patientObjList) {
+            out.println(patient.toString());
         }
         out.close();
     }
@@ -380,17 +385,17 @@ public class Utils {
         // modify file by sorting patients by first name or last name for all patients from a-z
         File file = new File(fileName);
         Scanner scan = new Scanner(file);
-        ArrayList<String> patientList = new ArrayList<>(); // initial patient arraylist
+        List<String> patientList = new ArrayList<>(); // initial patient arraylist
 
-        ArrayList<String> patientFirstLetterFirstNameList = new ArrayList<>();
-        ArrayList<Character> patientFirstNameFirstCharList = new ArrayList<Character>();
-        ArrayList<Integer> patientFirstNameFirstCharDecList = new ArrayList<>();
+        List<String> patientFirstLetterFirstNameList = new ArrayList<>();
+        List<Character> patientFirstNameFirstCharList = new ArrayList<Character>();
+        List<Integer> patientFirstNameFirstCharDecList = new ArrayList<>();
 
-        ArrayList<String> patientFirstLetterLastNameList = new ArrayList<>();
-        ArrayList<Character> patientLastNameFirstCharList = new ArrayList<Character>();
-        ArrayList<Integer> patientLastNameFirstCharDecList = new ArrayList<>();
+        List<String> patientFirstLetterLastNameList = new ArrayList<>();
+        List<Character> patientLastNameFirstCharList = new ArrayList<Character>();
+        List<Integer> patientLastNameFirstCharDecList = new ArrayList<>();
 
-        ArrayList<String> newPatientList = new ArrayList<>();
+        List<String> newPatientList = new ArrayList<>();
 
         if (firstOrLast.equals("first")) {
 
@@ -454,7 +459,7 @@ public class Utils {
             out.close();
             scan.close();
         } else if (firstOrLast.equals("last")) {
-            ArrayList<String> lastNamesOfPatients = new ArrayList<>();
+            List<String> lastNamesOfPatients = new ArrayList<>();
             while (scan.hasNextLine()) {
                 String patient = scan.nextLine();
                 patientList.add(patient);
@@ -569,7 +574,6 @@ public class Utils {
         Path destinationPath = Paths.get(downloadsFolderPath, fileName);
         try {
             Files.copy(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
-            System.out.println("File copied successfully to: " + destinationPath);
         } catch (IOException e) {
             System.err.println("Error copying the file: " + e.getMessage());
         }

@@ -59,10 +59,10 @@ public class TransferPatient extends JFrame {
                 if (nameText.isEmpty() || birthdateText.isEmpty()) {
                     new TransferPatientFailure();
                 }
-                else if (Utils.transferPatient(nameText, birthdateText, Utils.fileName)) {
+                else if (Utils.transferPatient(nameText, birthdateText, Utils.FILE_NAME)) {
                     new TransferPatientSuccess();
                 }
-                else if (!Utils.transferPatient(nameText, birthdateText, Utils.fileName)) {
+                else if (!Utils.transferPatient(nameText, birthdateText, Utils.FILE_NAME)) {
                     new TransferPatientFailure();
                 }
                 nameField.setText("");
