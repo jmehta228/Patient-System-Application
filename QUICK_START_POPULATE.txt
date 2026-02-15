@@ -1,0 +1,80 @@
+═══════════════════════════════════════════════════════════════════
+  QUICK START: DATABASE POPULATION TOOL
+═══════════════════════════════════════════════════════════════════
+
+This tool is SEPARATE from the main application.
+Users CANNOT access it - it's a developer/admin utility only.
+
+───────────────────────────────────────────────────────────────────
+  HOW TO RUN
+───────────────────────────────────────────────────────────────────
+
+  java -cp "out/production/Patient-System-Application:lib/*" TestAutoGenerate
+
+───────────────────────────────────────────────────────────────────
+  MENU OPTIONS
+───────────────────────────────────────────────────────────────────
+
+  1. Generate with default age range (0-100)
+  2. Generate with custom age range
+  3. Quick test - Generate 10 patients ⭐ RECOMMENDED
+  4. Show sample data (no insertion)
+  5. Exit
+
+───────────────────────────────────────────────────────────────────
+  QUICK TEST (RECOMMENDED)
+───────────────────────────────────────────────────────────────────
+
+  1. Run the command above
+  2. Type: 3
+  3. Press Enter
+  4. Done! 10 test patients added
+
+───────────────────────────────────────────────────────────────────
+  FEATURES
+───────────────────────────────────────────────────────────────────
+
+  ✓ Generates realistic patient names
+  ✓ Random birthdates (configurable age range)
+  ✓ Batch generation (1-1000 patients)
+  ✓ Shows current database status
+  ✓ Safe and validated
+  ✓ NOT in user interface
+
+───────────────────────────────────────────────────────────────────
+  EXAMPLES
+───────────────────────────────────────────────────────────────────
+
+  Generate 50 patients (ages 0-100):
+    Select option 1, enter 50
+
+  Generate 25 adults (ages 18-65):
+    Select option 2, enter 25, min: 18, max: 65
+
+  Quick 10 patients:
+    Select option 3
+
+  Preview data without inserting:
+    Select option 4
+
+───────────────────────────────────────────────────────────────────
+  PROGRAMMATIC USAGE
+───────────────────────────────────────────────────────────────────
+
+  import ButtonActionFiles.PatientDataGenerator;
+
+  // Generate 100 patients
+  int count = PatientDataGenerator.generateAndInsertPatients(100);
+
+  // Generate 50 adults (18-65)
+  int count = PatientDataGenerator.generateAndInsertPatients(50, 18, 65);
+
+───────────────────────────────────────────────────────────────────
+  DOCUMENTATION
+───────────────────────────────────────────────────────────────────
+
+  POPULATE_DATABASE_GUIDE.md  - Detailed guide
+  IMPLEMENTATION_SUMMARY.md    - Implementation details
+  AUTO_GENERATE_FEATURE.md     - Technical reference
+
+═══════════════════════════════════════════════════════════════════
