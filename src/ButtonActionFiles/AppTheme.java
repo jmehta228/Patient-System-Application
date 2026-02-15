@@ -87,14 +87,39 @@ public class AppTheme {
     public static final int SPACING_XXL = 48;
 
     // ===== SIZING =====
+    // Button dimensions
     public static final int BUTTON_HEIGHT = 40;
     public static final int BUTTON_HEIGHT_SM = 32;
     public static final int BUTTON_HEIGHT_LG = 48;
+    public static final int BUTTON_WIDTH_SM = 100;
+    public static final int BUTTON_WIDTH_MD = 120;
+    public static final int BUTTON_WIDTH_LG = 140;
+    public static final int BUTTON_WIDTH_XL = 160;
+
+    // Input dimensions
     public static final int INPUT_HEIGHT = 40;
+    public static final int INPUT_MIN_WIDTH = 200;
+    public static final int FORM_FIELD_HEIGHT = 85;  // Standard height for form field containers
+
+    // Layout dimensions
     public static final int SIDEBAR_WIDTH = 240;
+    public static final int DIALOG_WIDTH_SM = 400;
+    public static final int DIALOG_WIDTH_MD = 450;
+    public static final int DIALOG_WIDTH_LG = 600;
+    public static final int DIALOG_MIN_WIDTH = 400;
+
+    // Border radius
     public static final int CARD_RADIUS = 8;
     public static final int BUTTON_RADIUS = 6;
     public static final int INPUT_RADIUS = 6;
+
+    // Border thickness
+    public static final int BORDER_WIDTH = 1;
+
+    // Icon sizes
+    public static final int ICON_SIZE_SM = 16;
+    public static final int ICON_SIZE_MD = 20;
+    public static final int ICON_SIZE_LG = 24;
 
     // ===== SHADOWS =====
     public static final Color SHADOW_COLOR = new Color(0, 0, 0, 20);

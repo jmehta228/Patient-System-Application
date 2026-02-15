@@ -17,65 +17,24 @@ public class Utils {
     final static int CURRENT_YEAR = localDate.getYear();
 
     public static String isBirthValid(int month, int day, int year) {
-        //check if the given birth is valid.
-        String stringMonth = "";
-        String stringDay = "";
-        String stringYear = "";
-        String stringBirthdate = "";
+        // Returns birthdate in MM/DD/YYYY or "Invalid"
+        LocalDate today = LocalDate.now(ZoneId.systemDefault());
 
-        // checking base range of month
-        if (month >= 1 && month <= 12) {
-            // check is month is one/two digit number
-            if (month <= 9) {
-                stringMonth += "0" + month + "/";
+        // Keep a reasonable lower bound, but allow current year and prevent future dates.
+        if (year < 1922 || year > today.getYear()) {
+            return "Invalid";
+        }
+
+        try {
+            LocalDate birthDate = LocalDate.of(year, month, day);
+            if (birthDate.isAfter(today)) {
+                return "Invalid";
             }
-            else {
-                stringMonth += month + "/";
-            }
-        }
-        else {
-            stringMonth += "Invalid";
+        } catch (java.time.DateTimeException e) {
+            return "Invalid";
         }
 
-        // checking base range of days in month
-        if (day >= 1 && day <= 31) {
-            // checking if day is one/two digit number
-            if (day <= 9) {
-                stringDay += "0" + day + "/";
-            }
-            else {
-                stringDay += day + "/";
-            }
-        }
-        else {
-            stringDay += "Invalid";
-        }
-
-        // checking base range of year
-        if (year >= 1922 && year <= 2022) {
-            stringYear += year;
-        }
-        else {
-            stringYear += "Invalid";
-        }
-
-        // combining month/day/year string
-        stringBirthdate += stringMonth + stringDay + stringYear;
-
-        // accurate examples of invalid birthdates
-        if ((stringBirthdate.startsWith("02/29/")) && (Integer.parseInt(stringYear) % 4 != 0)) {
-            stringBirthdate = "Invalid";
-        }
-
-        if (stringBirthdate.startsWith("04/31") || stringBirthdate.startsWith("06/31") || stringBirthdate.startsWith("09/31") || stringBirthdate.startsWith("11/31")) {
-            stringBirthdate = "Invalid";
-        }
-
-        if (stringBirthdate.contains("Invalid")) {
-            stringBirthdate = "Invalid";
-        }
-        // return statement for birthdate, either returns birthdate in MM/DD/YYYY or "Invalid"
-        return stringBirthdate;
+        return String.format("%02d/%02d/%04d", month, day, year);
     }
 
     public static String addPatient(String name, String birth, String fileName) throws IOException {
@@ -147,7 +106,8 @@ public class Utils {
         }
 
         for (int i = 0; i < patientList.size(); i++) {
-            if ((patientList.get(i).contains("recover")) && (patientList.get(i).contains(name)) && (patientList.get(i).contains(birthdate))) {
+            String record = patientList.get(i);
+            if ((record.toLowerCase(Locale.ROOT).contains("recover")) && (record.contains(name)) && (record.contains(birthdate))) {
                 patientList.remove(i);
                 output = true;
                 break;

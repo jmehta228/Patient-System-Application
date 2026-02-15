@@ -1,6 +1,11 @@
 package ButtonActionFiles;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -8,137 +13,143 @@ import java.nio.file.StandardCopyOption;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.Period;
-import java.time.ZoneId;
-import java.util.*;
-import java.util.Date;
-
-import static ButtonActionFiles.GetPatientList.patientInformation;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 
 public class DatabaseUtils {
 
-    public static int insertPatientToDatabase(String patientFirstName, String patientLastName, String patientBirthdate) {
+    private static final String CONFIG_FILE = "config.properties";
+    private static final String PATIENT_TABLE = "PatientData";
+    private static final String DEFAULT_ORDER_BY = "PatientID";
+    private static final DateTimeFormatter SLASH_BIRTHDATE_FORMAT = DateTimeFormatter.ofPattern("MM/dd/uuuu");
+
+    // Used by GetPatientList and SortPatients to control default DB ordering.
+    private static volatile String patientListOrderBySql = DEFAULT_ORDER_BY;
+    private static final String PARSED_BIRTHDATE_SQL =
+        "COALESCE(STR_TO_DATE(PatientBirthdate, '%m/%d/%Y'), STR_TO_DATE(PatientBirthdate, '%Y-%m-%d'))";
+
+    private static Properties loadDbProperties() {
         Properties props = new Properties();
-        try (InputStream input = new FileInputStream("config.properties")) {
+        try (InputStream input = new FileInputStream(CONFIG_FILE)) {
             props.load(input);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Unable to load " + CONFIG_FILE, e);
         }
+        return props;
+    }
 
-        String MySQLUrl = props.getProperty("db.url");
+    private static Connection openConnection() throws SQLException {
+        Properties props = loadDbProperties();
+        String url = props.getProperty("db.url");
         String user = props.getProperty("db.user");
         String password = props.getProperty("db.password");
 
+        if (url == null || user == null || password == null) {
+            throw new IllegalStateException("Missing database configuration in " + CONFIG_FILE);
+        }
+
+        return DriverManager.getConnection(url, user, password);
+    }
+
+    private static String patientListQuery() {
+        String orderBy = patientListOrderBySql;
+        if (orderBy == null || orderBy.trim().isEmpty()) {
+            return "SELECT * FROM " + PATIENT_TABLE;
+        }
+        return "SELECT * FROM " + PATIENT_TABLE + " ORDER BY " + orderBy;
+    }
+
+    private static LocalDate parseBirthdate(String birthdate) {
+        if (birthdate == null) {
+            return null;
+        }
+        String trimmed = birthdate.trim();
+        if (trimmed.isEmpty()) {
+            return null;
+        }
         try {
-            final Connection connection = DriverManager.getConnection(MySQLUrl, user, password);
-            final Statement statement = connection.createStatement();
+            if (trimmed.contains("/")) {
+                return LocalDate.parse(trimmed, SLASH_BIRTHDATE_FORMAT);
+            }
+            // Handles ISO dates like yyyy-MM-dd (common for SQL DATE columns).
+            return LocalDate.parse(trimmed);
+        } catch (DateTimeParseException e) {
+            return null;
+        }
+    }
 
-            String update = String.format("INSERT INTO PatientData (PatientFirstName, PatientLastName, PatientBirthdate, PatientStatus)" +
-                    "VALUES ('%s', '%s', '%s', 'Sick')", patientFirstName, patientLastName, patientBirthdate);
-            int returnValue = statement.executeUpdate(update);
+    private static String escapeCsv(String value) {
+        if (value == null) {
+            return "";
+        }
+        boolean needsQuotes = value.contains(",") || value.contains("\"") || value.contains("\n") || value.contains("\r");
+        String escaped = value.replace("\"", "\"\"");
+        return needsQuotes ? ("\"" + escaped + "\"") : escaped;
+    }
 
-            connection.close();
-            statement.close();
-
-            return returnValue;
+    public static int insertPatientToDatabase(String patientFirstName, String patientLastName, String patientBirthdate) {
+        String sql = "INSERT INTO " + PATIENT_TABLE +
+            " (PatientFirstName, PatientLastName, PatientBirthdate, PatientStatus) VALUES (?, ?, ?, 'Sick')";
+        try (Connection connection = openConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, patientFirstName);
+            statement.setString(2, patientLastName);
+            statement.setString(3, patientBirthdate);
+            return statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
     public static int deletePatientFromDatabase(String patientID, String patientFirstName, String patientLastName, String patientBirthdate) throws FileNotFoundException {
-        Properties props = new Properties();
-        try (InputStream input = new FileInputStream("config.properties")) {
-            props.load(input);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        String MySQLUrl = props.getProperty("db.url");
-        String user = props.getProperty("db.user");
-        String password = props.getProperty("db.password");
-
-        try {
-            Connection connection = DriverManager.getConnection(MySQLUrl, user, password);
-            Statement statement = connection.createStatement();
-
-            int patientIDNumber = Integer.parseInt(patientID);
-
-            String update = String.format("DELETE FROM PatientData WHERE PatientID = '%d' AND PatientFirstName = '%s' AND PatientLastName = '%s' AND PatientBirthdate = '%s'",
-                    patientIDNumber, patientFirstName, patientLastName, patientBirthdate);
-            int returnValue = statement.executeUpdate(update);
-
-            connection.close();
-            statement.close();
-
-            return returnValue;
-
+        String sql = "DELETE FROM " + PATIENT_TABLE +
+            " WHERE PatientID = ? AND PatientFirstName = ? AND PatientLastName = ? AND PatientBirthdate = ?";
+        try (Connection connection = openConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, Integer.parseInt(patientID));
+            statement.setString(2, patientFirstName);
+            statement.setString(3, patientLastName);
+            statement.setString(4, patientBirthdate);
+            return statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
     public static boolean transferPatientDatabase(String patientFirstName, String patientLastName, String patientBirthdate) throws FileNotFoundException {
-        Properties props = new Properties();
-        try (InputStream input = new FileInputStream("config.properties")) {
-            props.load(input);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        String MySQLUrl = props.getProperty("db.url");
-        String user = props.getProperty("db.user");
-        String password = props.getProperty("db.password");
-
-        try {
-            Connection connection = DriverManager.getConnection(MySQLUrl, user, password);
-            Statement statement = connection.createStatement();
-
-            String update = String.format("UPDATE PatientData SET PatientStatus = 'Recover' WHERE PatientFirstName = '%s' AND PatientLastName = '%s' AND PatientBirthdate = '%s'", patientFirstName, patientLastName, patientBirthdate);
-            statement.executeUpdate(update);
-
-            connection.close();
-            statement.close();
-            return true;
+        String sql = "UPDATE " + PATIENT_TABLE +
+            " SET PatientStatus = 'Recover' WHERE PatientFirstName = ? AND PatientLastName = ? AND PatientBirthdate = ? AND PatientStatus <> 'Recover'";
+        try (Connection connection = openConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, patientFirstName);
+            statement.setString(2, patientLastName);
+            statement.setString(3, patientBirthdate);
+            return statement.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
     public static String[][] getPatientListFromDatabase() throws SQLException, FileNotFoundException {
-        Properties props = new Properties();
-        try (InputStream input = new FileInputStream("config.properties")) {
-            props.load(input);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        String MySQLUrl = props.getProperty("db.url");
-        String user = props.getProperty("db.user");
-        String password = props.getProperty("db.password");
-
-        Connection connection = DriverManager.getConnection(MySQLUrl, user, password);
-        Statement statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-
-        String listStatement = "SELECT * FROM PatientData";
-        ResultSet entries = statement.executeQuery(listStatement);
-        if (entries.next()) {
-            entries.last();
-            int rowCount = entries.getRow();
-            entries.beforeFirst();
-            String[][] patientEntries = new String[rowCount][5];
-
-            int rowIndex = 0;
+        String sql = patientListQuery();
+        try (Connection connection = openConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet entries = statement.executeQuery()) {
+            List<String[]> rows = new ArrayList<>();
             while (entries.next()) {
-                patientEntries[rowIndex][0] = entries.getString(1); // id
-                patientEntries[rowIndex][1] = entries.getString(2); // firstName
-                patientEntries[rowIndex][2] = entries.getString(3); // lastName
-                patientEntries[rowIndex][3] = entries.getString(4); // birthdate
-                patientEntries[rowIndex][4] = entries.getString(5); // status
-                rowIndex++;
+                rows.add(new String[] {
+                    entries.getString(1), // id
+                    entries.getString(2), // firstName
+                    entries.getString(3), // lastName
+                    entries.getString(4), // birthdate
+                    entries.getString(5)  // status
+                });
             }
-            return patientEntries;
+            return rows.toArray(new String[0][5]);
         }
-        return null;
     }
 
     public static int[] getPatientCount() throws SQLException, FileNotFoundException {
@@ -147,17 +158,14 @@ public class DatabaseUtils {
         int[] counts = new int[3];
         int sickCount = 0;
         int recoverCount = 0;
-        if (entries == null) {
-            counts[0] = 0;
-            counts[1] = 0;
-            counts[2] = 0;
-            return counts;
-        }
-        for (int i = 0; i < entries.length; i++) {
-            if (entries[i][4].equals("Sick")) {
+        for (String[] row : entries) {
+            if (row.length < 5 || row[4] == null) {
+                continue;
+            }
+            if ("Sick".equalsIgnoreCase(row[4])) {
                 sickCount++;
             }
-            else if (entries[i][4].equals("Recover")) {
+            else if ("Recover".equalsIgnoreCase(row[4])) {
                 recoverCount++;
             }
         }
@@ -170,178 +178,104 @@ public class DatabaseUtils {
 
     public static double returnAverageAge() throws SQLException, FileNotFoundException {
         String[][] entries = getPatientListFromDatabase();
+        if (entries.length == 0) {
+            return 0;
+        }
+
+        LocalDate today = LocalDate.now();
         double ageSum = 0;
         int counter = 0;
-        assert entries != null;
-        for (String[] line : entries) { // [id, firstname, lastname, birthdate, status]
-            String birthdate = line[3];
-            int month = Integer.parseInt(birthdate.substring(0, 2));
-            int day = Integer.parseInt(birthdate.substring(3, 5));
-            int year = Integer.parseInt(birthdate.substring(6, 10));
-            if (!Utils.isBirthValid(month, day, year).equals("Invalid")) {
-                counter++;
-                int tempAge = (int) calculateAge(month, day, year);
-                System.out.println(tempAge);
-                ageSum += tempAge;
-            }
-        }
-        return (ageSum / counter);
-    }
 
-    private static double calculateAge(int month, int day, int year) {
-        Date date = new Date();
-        LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        LocalDate birthDate = LocalDate.of(year, month, day);
-        return Period.between(birthDate, localDate).getYears();
+        for (String[] line : entries) { // [id, firstname, lastname, birthdate, status]
+            if (line.length < 4) {
+                continue;
+            }
+            LocalDate birthDate = parseBirthdate(line[3]);
+            if (birthDate == null || birthDate.isAfter(today)) {
+                continue;
+            }
+            counter++;
+            ageSum += Period.between(birthDate, today).getYears();
+        }
+
+        return counter == 0 ? 0 : (ageSum / counter);
     }
 
     public static void sortPatientsByID() throws SQLException, FileNotFoundException {
-        Properties props = new Properties();
-        try (InputStream input = new FileInputStream("config.properties")) {
-            props.load(input);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        String MySQLUrl = props.getProperty("db.url");
-        String user = props.getProperty("db.user");
-        String password = props.getProperty("db.password");
-
-        Connection connection = DriverManager.getConnection(MySQLUrl, user, password);
-        Statement statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-
-        String sql = "SELECT * FROM PatientData ORDER BY PatientID";
-        statement.execute(sql);
-
-        connection.close();
-        statement.close();
+        patientListOrderBySql = "PatientID";
     }
 
     public static void sortPatientsByAge() throws SQLException, FileNotFoundException {
-        Properties props = new Properties();
-        try (InputStream input = new FileInputStream("config.properties")) {
-            props.load(input);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        String MySQLUrl = props.getProperty("db.url");
-        String user = props.getProperty("db.user");
-        String password = props.getProperty("db.password");
-
-        Connection connection = DriverManager.getConnection(MySQLUrl, user, password);
-        Statement statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-
-        String sql = "SELECT * FROM PatientData ORDER BY DATEDIFF(CURDATE(), PatientBirthdate) DESC";
-        statement.execute(sql);
-
-        connection.close();
-        statement.close();
+        // Youngest -> oldest (newest birthdate first)
+        patientListOrderBySql = PARSED_BIRTHDATE_SQL + " DESC, PatientID ASC";
     }
 
     public static void sortPatientsByName(String firstOrLast) throws SQLException, FileNotFoundException {
-        Properties props = new Properties();
-        try (InputStream input = new FileInputStream("config.properties")) {
-            props.load(input);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if ("First".equalsIgnoreCase(firstOrLast)) {
+            patientListOrderBySql = "PatientFirstName, PatientID";
+        } else if ("Last".equalsIgnoreCase(firstOrLast)) {
+            patientListOrderBySql = "PatientLastName, PatientID";
+        } else {
+            patientListOrderBySql = DEFAULT_ORDER_BY;
         }
-
-        String MySQLUrl = props.getProperty("db.url");
-        String user = props.getProperty("db.user");
-        String password = props.getProperty("db.password");
-
-        Connection connection = DriverManager.getConnection(MySQLUrl, user, password);
-        Statement statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-
-        if (firstOrLast.equals("First")) {
-            String sql = "SELECT * FROM PatientData ORDER BY PatientFirstName";
-            statement.execute(sql);
-        }
-        else if (firstOrLast.equals("Last")) {
-            String sql = "SELECT * FROM PatientData ORDER BY PatientLastName";
-            statement.execute(sql);
-        }
-
-        connection.close();
-        statement.close();
     }
 
     public static boolean exportDatabaseEntriesToCSV() throws SQLException, IOException {
-        Properties props = new Properties();
-        try (InputStream input = new FileInputStream("config.properties")) {
-            props.load(input);
-        }
+        Path sourcePath = Paths.get("Patient_Records.csv");
 
-        String MySQLUrl = props.getProperty("db.url");
-        String user = props.getProperty("db.user");
-        String password = props.getProperty("db.password");
+        try (Connection connection = openConnection();
+             PreparedStatement statement = connection.prepareStatement("SELECT * FROM " + PATIENT_TABLE);
+             ResultSet result = statement.executeQuery();
+             BufferedWriter fileWriter = Files.newBufferedWriter(sourcePath, StandardCharsets.UTF_8)) {
 
-        boolean fileExported = true;
-        Connection connection = DriverManager.getConnection(MySQLUrl, user, password);
-        PreparedStatement statement = connection.prepareStatement("SELECT * FROM PatientData");
-        ResultSet result = statement.executeQuery();
-        BufferedWriter fileWriter = new BufferedWriter(new FileWriter("Patient_Records.csv"));
+            ResultSetMetaData metaData = result.getMetaData();
+            int columnCount = metaData.getColumnCount();
 
-        ResultSetMetaData metaData = result.getMetaData();
-        int columnCount = metaData.getColumnCount();
-        for (int i = 1; i <= columnCount; i++) {
-            fileWriter.write(metaData.getColumnName(i));
-            if (i < columnCount) {
-                fileWriter.write(",");
-            }
-        }
-        fileWriter.newLine();
-
-        while (result.next()) {
             for (int i = 1; i <= columnCount; i++) {
-                fileWriter.write(result.getString(i));
+                fileWriter.write(escapeCsv(metaData.getColumnName(i)));
                 if (i < columnCount) {
                     fileWriter.write(",");
                 }
             }
             fileWriter.newLine();
+
+            while (result.next()) {
+                for (int i = 1; i <= columnCount; i++) {
+                    fileWriter.write(escapeCsv(result.getString(i)));
+                    if (i < columnCount) {
+                        fileWriter.write(",");
+                    }
+                }
+                fileWriter.newLine();
+            }
         }
-
-        result.close();
-        statement.close();
-        connection.close();
-        fileWriter.close();
-
 
         String userHome = System.getProperty("user.home");
-        String downloadsFolderPath = userHome + File.separator + "Downloads";
-        Path sourcePath = Paths.get("Patient_Records.csv");
-        String fileName = sourcePath.getFileName().toString();
-        Path destinationPath = Paths.get(downloadsFolderPath, fileName);
+        Path downloadsFolderPath = Paths.get(userHome, "Downloads");
+        Path destinationPath = downloadsFolderPath.resolve(sourcePath.getFileName());
+
         try {
             Files.copy(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
+            return true;
         } catch (IOException e) {
             System.err.println("Error copying the file: " + e.getMessage());
+            return false;
         }
-
-        return fileExported;
     }
 
     public static void printDatabase() throws SQLException, FileNotFoundException {
-        Properties props = new Properties();
-        try (InputStream input = new FileInputStream("config.properties")) {
-            props.load(input);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        String MySQLUrl = props.getProperty("db.url");
-        String user = props.getProperty("db.user");
-        String password = props.getProperty("db.password");
-
-        Connection connection = DriverManager.getConnection(MySQLUrl, user, password);
-        Statement statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-
-        String sqlStatement = "SELECT * FROM PatientData";
-        ResultSet entries = statement.executeQuery(sqlStatement);
-        while (entries.next()) {
-            System.out.printf("[%d %s %s %s %s]\n", entries.getInt("PatientID"), entries.getString("PatientFirstName"), entries.getString("PatientLastName"), entries.getString("PatientBirthdate"), entries.getString("PatientStatus"));
+        String sqlStatement = "SELECT * FROM " + PATIENT_TABLE;
+        try (Connection connection = openConnection();
+             PreparedStatement statement = connection.prepareStatement(sqlStatement);
+             ResultSet entries = statement.executeQuery()) {
+            while (entries.next()) {
+                System.out.printf("[%d %s %s %s %s]\n",
+                    entries.getInt("PatientID"),
+                    entries.getString("PatientFirstName"),
+                    entries.getString("PatientLastName"),
+                    entries.getString("PatientBirthdate"),
+                    entries.getString("PatientStatus"));
+            }
         }
     }
 }

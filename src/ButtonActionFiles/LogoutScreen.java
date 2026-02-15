@@ -2,60 +2,110 @@ package ButtonActionFiles;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
+/**
+ * Modern logout confirmation dialog.
+ */
 public class LogoutScreen {
     public static JFrame logoutFrame;
-    JPanel logoutPanel;
 
     public LogoutScreen() {
-        logoutFrame = new JFrame("Patient System Application - Logout");
-        logoutFrame.setPreferredSize(new Dimension(500, 500));
-        logoutFrame.setLocation(500, 200);
+        createFrame();
+    }
 
-        JLabel confirmationLabel = new JLabel("Are you sure you would like to logout?", SwingConstants.CENTER);
+    private void createFrame() {
+        logoutFrame = new JFrame("Logout");
+        logoutFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        logoutFrame.setSize(380, 280);
+        logoutFrame.setResizable(false);
+        logoutFrame.setLocationRelativeTo(null);
+        logoutFrame.setBackground(AppTheme.BG_PRIMARY);
 
-        JButton logoutButton = new JButton("Logout");
-        logoutButton.setPreferredSize(new Dimension(400, 100));
-        logoutButton.addActionListener(new LogoutButtonAction());
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(AppTheme.BG_PRIMARY);
 
-        JButton notLogoutButton = new JButton("No, do not logout");
-        notLogoutButton.setPreferredSize(new Dimension(400, 100));
-        notLogoutButton.addActionListener(new NotLogoutButtonAction());
+        mainPanel.add(createContent(), BorderLayout.CENTER);
+        mainPanel.add(createFooter(), BorderLayout.SOUTH);
 
-        logoutPanel = new JPanel();
-        logoutPanel.setLayout(new BoxLayout(logoutPanel, BoxLayout.Y_AXIS));
-
-        confirmationLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        logoutButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        notLogoutButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        logoutPanel.add(Box.createVerticalStrut(20)); // Add vertical space at the top
-        logoutPanel.add(confirmationLabel);
-        logoutPanel.add(Box.createVerticalStrut(20)); // Add vertical space between components
-        logoutPanel.add(logoutButton);
-        logoutPanel.add(Box.createVerticalStrut(10)); // Add vertical space between components
-        logoutPanel.add(notLogoutButton);
-        logoutPanel.add(Box.createVerticalStrut(100)); // Add vertical space at the bottom
-
-        logoutFrame.add(logoutPanel);
-        logoutFrame.setResizable(true);
-        logoutFrame.pack();
+        logoutFrame.add(mainPanel);
         logoutFrame.setVisible(true);
     }
 
-    private static class LogoutButtonAction implements ActionListener {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            System.exit(0);
-        }
+    private JPanel createContent() {
+        JPanel content = new JPanel();
+        content.setBackground(AppTheme.BG_PRIMARY);
+        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+        content.setBorder(BorderFactory.createEmptyBorder(40, 40, 20, 40));
+
+        // Icon
+        JPanel iconPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                // Circle background
+                g2.setColor(new Color(AppTheme.WARNING.getRed(), AppTheme.WARNING.getGreen(),
+                    AppTheme.WARNING.getBlue(), 30));
+                g2.fillOval(0, 0, 60, 60);
+
+                g2.dispose();
+            }
+        };
+        iconPanel.setOpaque(false);
+        iconPanel.setPreferredSize(new Dimension(60, 60));
+        iconPanel.setMaximumSize(new Dimension(60, 60));
+        iconPanel.setLayout(new GridBagLayout());
+        iconPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel iconLabel = new JLabel("\u2190");
+        iconLabel.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 28));
+        iconLabel.setForeground(AppTheme.WARNING);
+        iconPanel.add(iconLabel);
+
+        // Title
+        JLabel titleLabel = new JLabel("Logout?");
+        titleLabel.setFont(AppTheme.FONT_SUBTITLE);
+        titleLabel.setForeground(AppTheme.TEXT_PRIMARY);
+        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        // Message
+        JLabel messageLabel = new JLabel("Are you sure you want to logout?");
+        messageLabel.setFont(AppTheme.FONT_BODY);
+        messageLabel.setForeground(AppTheme.TEXT_SECONDARY);
+        messageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        content.add(iconPanel);
+        content.add(Box.createVerticalStrut(20));
+        content.add(titleLabel);
+        content.add(Box.createVerticalStrut(10));
+        content.add(messageLabel);
+        content.add(Box.createVerticalGlue());
+
+        return content;
     }
 
-    private static class NotLogoutButtonAction implements ActionListener {
-        @Override
-        public void actionPerformed(ActionEvent e) {
+    private JPanel createFooter() {
+        JPanel footer = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 20));
+        footer.setBackground(AppTheme.BG_PRIMARY);
+        footer.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, AppTheme.BORDER));
+
+        ModernComponents.SecondaryButton cancelButton = new ModernComponents.SecondaryButton("Cancel");
+        cancelButton.setPreferredSize(new Dimension(120, AppTheme.BUTTON_HEIGHT));
+        cancelButton.addActionListener(e -> logoutFrame.dispose());
+
+        ModernComponents.ModernButton logoutButton = new ModernComponents.ModernButton("Logout");
+        logoutButton.setButtonColors(AppTheme.WARNING, Color.WHITE);
+        logoutButton.setPreferredSize(new Dimension(120, AppTheme.BUTTON_HEIGHT));
+        logoutButton.addActionListener(e -> {
             logoutFrame.dispose();
-        }
+            System.exit(0);
+        });
+
+        footer.add(cancelButton);
+        footer.add(logoutButton);
+
+        return footer;
     }
 }

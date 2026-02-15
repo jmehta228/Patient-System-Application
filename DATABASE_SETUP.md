@@ -34,7 +34,7 @@ Try connecting to MySQL with the credentials from your config.properties:
 
 ```bash
 mysql -u root -p
-# Enter password: Jugu9408$!
+# Enter password: ...
 ```
 
 If this fails, you need to:

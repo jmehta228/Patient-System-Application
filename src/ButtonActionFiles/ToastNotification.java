@@ -147,7 +147,7 @@ public class ToastNotification extends JWindow {
         }
     }
 
-    public void show() {
+    public void showToast() {
         setVisible(true);
         fadeIn();
     }
@@ -214,28 +214,28 @@ public class ToastNotification extends JWindow {
     public static void showSuccess(Window parent, String message) {
         SwingUtilities.invokeLater(() -> {
             ToastNotification toast = new ToastNotification(parent, message, ToastType.SUCCESS);
-            toast.show();
+            toast.showToast();
         });
     }
 
     public static void showError(Window parent, String message) {
         SwingUtilities.invokeLater(() -> {
             ToastNotification toast = new ToastNotification(parent, message, ToastType.ERROR);
-            toast.show();
+            toast.showToast();
         });
     }
 
     public static void showWarning(Window parent, String message) {
         SwingUtilities.invokeLater(() -> {
             ToastNotification toast = new ToastNotification(parent, message, ToastType.WARNING);
-            toast.show();
+            toast.showToast();
         });
     }
 
     public static void showInfo(Window parent, String message) {
         SwingUtilities.invokeLater(() -> {
             ToastNotification toast = new ToastNotification(parent, message, ToastType.INFO);
-            toast.show();
+            toast.showToast();
         });
     }
 
